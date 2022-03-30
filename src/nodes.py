@@ -1,4 +1,5 @@
 import re
+from typing import Callable
 from .exceptions import MarkupError
 from .html import html
 from .utils import partition, strip
@@ -157,20 +158,23 @@ HANDLERS = {
     'list': list_node,
     'table': table_node,
 }
+HandlerType = Callable[[str, str | None, list[str], list[str], list[str] | None], tuple[str, dict[str, str | bool], str | None, list[str], list[str]]]
 
-def process(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> tuple[str, dict[str, str | bool], str | None]:
+def get_handler(command: str) -> HandlerType:
     if command in HANDLERS:
-        func = HANDLERS[command]
+        return HANDLERS[command]
     elif command in SIMPLE_TAGS:
-        func = lambda command, id, classes, data, text: (command, {}, id, classes, text)
+        return lambda command, id, classes, data, text: (command, {}, id, classes, text)
     else:
         raise MarkupError('Invalid command')
 
-    tag, attributes, id, classes, text = func(command, id, classes, data, text)
+
+def process(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> str:
+    tag, attributes, id, classes, text = get_handler(command)(command, id, classes, data, text)
 
     if id is not None:
         attributes['id'] = id
     if classes:
         attributes['class'] = ' '.join(classes)
 
-    return tag, attributes, ''.join(text) if text is not None else None
+    return html(tag, attributes, ''.join(text) if text is not None else None)

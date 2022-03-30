@@ -62,8 +62,7 @@ def parse_string(value: str, *, alphabet: str=STRING_CHARS, exclude: str='', esc
 
 def parse_tag(value: str) -> str:
     # $cmd#id.class.class[data]{text}
-    func = NODE_TYPES[value[0]]
-    value = value[1:]
+    prefix, value = value[0], value[1:]
     command, value = parse_string(value, error_msg='Invalid command name')
     id, value = parse_id(value)
     classes, value = parse_classes(value)
@@ -71,7 +70,7 @@ def parse_tag(value: str) -> str:
     text, value = parse_text(value)
 
     try:
-        return html(*func(command, id, classes, data, text)), value
+        return NODE_TYPES[prefix](command, id, classes, data, text), value
     except MarkupError as e:
         raise ParseError(e.message, value)
     except Exception:
