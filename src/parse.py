@@ -68,7 +68,7 @@ class Markup:
             classes.append(class_)
 
         if value and value[0] == '[':
-            data, value = self.parse_list(value[1:], skip_whitespace=True, exclude='\r\n', end=']', embed=False)
+            data, value = self.parse_list(value[1:], skip_whitespace=True, end=']', embed=False)
             value = value[1:]
         else:
             data = []
@@ -93,21 +93,19 @@ class Markup:
         except Exception:
             return error(f'{type(e).__name__}: {e}'), value
 
-    def parse_list(self, value: str, *, skip_whitespace: bool=False, exclude: str='', end: str='', embed: bool=True, error_msg: str='') -> tuple[list[str], str]:
+    def parse_list(self, value: str, *, skip_whitespace: bool=False, end: str='', embed: bool=True, error_msg: str='') -> tuple[list[str], str]:
         parts = []
-        quoted_exclude = exclude + '"'
-        unquoted_exclude = exclude + end + '"' + string.whitespace
-        while value and value[0] not in exclude + end:
+        while value and value[0] not in end:
             if value[0] in string.whitespace:
-                part, value = self.parse_string(value, alphabet=string.whitespace, exclude=exclude, error_msg='Invalid whitespace')
+                part, value = self.parse_string(value, alphabet=string.whitespace, error_msg='Invalid whitespace')
                 if skip_whitespace:
                     continue
             elif value[0] == '"':
-                part, value = self.parse_string(value[1:], alphabet='', exclude=quoted_exclude, escape=True, no_escape=exclude, embed=embed, error_msg='Empty or incomplete string')
+                part, value = self.parse_string(value[1:], alphabet='', exclude='"', escape=True, embed=embed, error_msg='Empty or incomplete string')
                 if value[0] != '"':
                     raise ParseError('Incomplete string', value)
                 value = value[1:]
             else:
-                part, value = self.parse_string(value, alphabet='', exclude=unquoted_exclude, escape=True, no_escape=exclude, embed=embed)
+                part, value = self.parse_string(value, alphabet='', exclude=end + '"' + string.whitespace, escape=True, embed=embed)
             parts.append(part)
         return parts, value
