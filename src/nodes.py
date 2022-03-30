@@ -2,42 +2,34 @@ import re
 from functools import wraps
 from typing import Callable
 from .exceptions import MarkupError
-from .html import html
+from .html import Attributes, html
 from .utils import partition, strip
 
+_HandlerArgs = [str, Attributes, list[str], list[str] | None]
+_HandlerReturn = tuple[str, Attributes, list[str] | None]
+_Handler = Callable[_HandlerArgs, _HandlerReturn]
 HandlerArgs = [str, str | None, list[str], list[str], list[str] | None]
-_HandlerReturn = tuple[str, dict[str, str | bool], str | None, list[str], list[str]]
-_Handler = Callable[HandlerArgs, _HandlerReturn]
 Handler = Callable[HandlerArgs, str]
 
 def handler(func: _Handler) -> Handler:
     @wraps(func)
     def wrapper(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> str:
-        tag, attributes, id, classes, text = func(command, id, classes, data, text)
-
-        if id is not None:
-            attributes['id'] = id
-        if classes:
-            attributes['class'] = ' '.join(classes)
-
-        if text is None:
-            content = None
-        else:
-            content = ''.join(text)
-
-        return html(tag, attributes, content)
+        attributes = {
+            'id': id,
+            'class': classes,
+        }
+        return html(*func(command, attributes, data, text))
 
     return wrapper
 
 
 @handler
-def simple_node(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> _HandlerReturn:
-    return command, {}, id, classes, text
+def simple_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+    return command, attributes, text
 
 
 @handler
-def link_node(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> _HandlerReturn:
-    attributes = {}
+def link_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
     if data[0] == '_blank':
         attributes['target'] = data.pop(0)
     url, = data
@@ -45,11 +37,11 @@ def link_node(command: str, id: str | None, classes: list[str], data: list[str],
     if text is None:
         text = [url]
 
-    return 'a', attributes, id, classes, text
+    return 'a', attributes, text
 
 
 @handler
-def section_node(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> _HandlerReturn:
+def section_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
     level, title = data
 
     if id is None:
@@ -64,22 +56,21 @@ def section_node(command: str, id: str | None, classes: list[str], data: list[st
     else:
         text.insert(0, heading)
 
-    return 'section', {}, id, classes, text
+    return 'section', attributes, text
 
 
 @handler
-def footnote_node(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> _HandlerReturn:
+def footnote_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
     number, = data
-    classes.append('footnote')
+    attributes['class'].append('footnote')
     prefix = html('sup', {}, number)
     text.insert(0, prefix)
 
-    return 'p', {}, id, classes, text
+    return 'p', attributes, text
 
 
 @handler
-def list_node(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> _HandlerReturn:
-    attributes = {}
+def list_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
     for attr in data:
         if attr.startswith('start='):
             attributes['start'] = attr.removeprefix('start=')
@@ -88,7 +79,7 @@ def list_node(command: str, id: str | None, classes: list[str], data: list[str],
         else:
             raise MarkupError('Invalid tag data')
 
-    if attributes:
+    if data:
         tag = 'ol'
     else:
         tag = 'ul'
@@ -103,11 +94,11 @@ def list_node(command: str, id: str | None, classes: list[str], data: list[str],
         if trailing:
             text.append(trailing)
 
-    return tag, attributes, id, classes, text
+    return tag, attributes, text
 
 
 @handler
-def table_node(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> _HandlerReturn:
+def table_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
     header_row = header_col = False
     for attr in data:
         if attr.startswith('headers='):
@@ -180,7 +171,7 @@ def table_node(command: str, id: str | None, classes: list[str], data: list[str]
                 row.extend([leading, html(tag, attributes, ''.join(cell)), trailing])
         if row:
             rows.append(html('tr', {}, ''.join(row)))
-    return 'table', {}, id, classes, rows
+    return 'table', attributes, rows
 
 
 SimpleNodes = dict[str, list[str]]
