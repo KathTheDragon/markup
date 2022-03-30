@@ -158,7 +158,7 @@ HANDLERS = {
     'table': table_node,
 }
 
-def process(command, id, classes, data, text):
+def process(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> tuple[str, dict[str, str | bool], str | None]:
     if command in HANDLERS:
         func = HANDLERS[command]
     elif command in SIMPLE_TAGS:
