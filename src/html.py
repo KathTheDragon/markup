@@ -2,10 +2,7 @@ Attribute = str | bool | list[str] | None
 Attributes = dict[str, Attribute]
 
 def html(tag: str, attributes: Attributes={}, content: list[str] | None=None) -> str:
-    if attributes:
-        open = f'{tag} {format_attributes(attributes)}'
-    else:
-        open = tag
+    open = f'{tag} {format_attributes(attributes)}'.strip()
     close = tag
 
     if content is None:  # Self-closing
