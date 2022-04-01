@@ -24,6 +24,7 @@ class Markup:
     def __init__(self) -> None:
         self.node_handlers = nodes.make_node_handlers()
         self.simple_nodes = nodes.make_simple_nodes()
+        self.prefixes = ''.join(set(self.simple_nodes) | set(self.node_handlers))
 
     def parse(self, string: str) -> str:
         output, remainder = self.parse_string(string, alphabet='', embed=True)
@@ -31,8 +32,9 @@ class Markup:
             ...
         return output
 
-    def parse_string(self, value: str, *, alphabet: str=STRING_CHARS, exclude: str='', embed: bool=False, error_msg: str='') -> tuple[str, str]:
+    def parse_string(self, value: str, *, alphabet: str=STRING_CHARS, exclude: str='', error_msg: str='') -> tuple[str, str]:
         escape = is_valid_char('\\', alphabet, exclude)
+        embed = any(is_valid_char(char, alphabet, exclude) for char in self.prefixes)
         out = ''
         while value:
             if escape and value[0] == '\\':
@@ -41,7 +43,7 @@ class Markup:
                 else:
                     out += value[:2]
                     value = value[2:]
-            elif embed and value[0] in (set(self.simple_nodes) | set(self.node_handlers)):
+            elif embed and value[0] in self.prefixes:
                 tag, value = self.parse_node(value)
                 out += tag
             elif is_valid_char(value[0], alphabet, exclude):
@@ -70,13 +72,13 @@ class Markup:
             classes.append(class_)
 
         if value and value[0] == '[':
-            data, value = self.parse_list(value[1:], skip_whitespace=True, end=']')
+            data, value = self.parse_list(value[1:], skip_whitespace=True, exclude=self.prefixes, end=']')
             value = value[1:]
         else:
             data = []
 
         if value and value[0] == '{':
-            text, value = self.parse_list(value[1:], end='}', embed=True)
+            text, value = self.parse_list(value[1:], end='}')
             value = value[1:]
         else:
             text = None
@@ -95,7 +97,7 @@ class Markup:
         except Exception:
             return error(f'{type(e).__name__}: {e}'), value
 
-    def parse_list(self, value: str, *, skip_whitespace: bool=False, end: str='', embed: bool=False, error_msg: str='') -> tuple[list[str], str]:
+    def parse_list(self, value: str, *, skip_whitespace: bool=False, exclude: str='', end: str='', error_msg: str='') -> tuple[list[str], str]:
         parts = []
         while value and value[0] not in end:
             if value[0] in string.whitespace:
@@ -103,11 +105,11 @@ class Markup:
                 if skip_whitespace:
                     continue
             elif value[0] == '"':
-                part, value = self.parse_string(value[1:], alphabet='', exclude='"', embed=embed, error_msg='Empty or incomplete string')
+                part, value = self.parse_string(value[1:], alphabet='', exclude=exclude + '"', error_msg='Empty or incomplete string')
                 if value[0] != '"':
                     raise ParseError('Incomplete string', value)
                 value = value[1:]
             else:
-                part, value = self.parse_string(value, alphabet='', exclude=end + '"' + string.whitespace, embed=embed)
+                part, value = self.parse_string(value, alphabet='', exclude=exclude + end + '"' + string.whitespace)
             parts.append(part)
         return parts, value
