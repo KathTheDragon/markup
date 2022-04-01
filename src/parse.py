@@ -97,7 +97,7 @@ class Markup:
         parts = []
         while value and value[0] not in end:
             if value[0] in string.whitespace:
-                part, value = self.parse_string(value, alphabet=string.whitespace, error_msg='Invalid whitespace')
+                part, value = self.parse_string(value, alphabet=string.whitespace)
                 if skip_whitespace:
                     continue
             elif value[0] == '"':
