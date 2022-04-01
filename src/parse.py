@@ -27,7 +27,7 @@ class Markup:
         self.prefixes = ''.join(set(self.simple_nodes) | set(self.node_handlers))
 
     def parse(self, string: str) -> str:
-        output, remainder = self.parse_string(string, alphabet='', embed=True)
+        output, remainder = self.parse_string(string, alphabet='')
         if remainder:
             ...
         return output
