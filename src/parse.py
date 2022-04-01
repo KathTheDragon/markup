@@ -26,19 +26,18 @@ class Markup:
         self.simple_nodes = nodes.make_simple_nodes()
 
     def parse(self, string: str) -> str:
-        output, remainder = self.parse_string(string, alphabet='', escape=True, embed=True)
+        output, remainder = self.parse_string(string, alphabet='', embed=True)
         if remainder:
             ...
         return output
 
-    def parse_string(self, value: str, *, alphabet: str=STRING_CHARS, exclude: str='', escape: bool=False, no_escape: str='', embed: bool=False, error_msg: str='') -> tuple[str, str]:
+    def parse_string(self, value: str, *, alphabet: str=STRING_CHARS, exclude: str='', embed: bool=False, error_msg: str='') -> tuple[str, str]:
+        escape = is_valid_char('\\', alphabet, exclude)
         out = ''
         while value:
             if escape and value[0] == '\\':
                 if len(value) <= 1:
                     raise ParseError('Incomplete escape sequence', value)
-                elif value[1] in no_escape:
-                    raise ParseError('Invalid escape sequence', value)
                 else:
                     out += value[:2]
                     value = value[2:]
@@ -104,11 +103,11 @@ class Markup:
                 if skip_whitespace:
                     continue
             elif value[0] == '"':
-                part, value = self.parse_string(value[1:], alphabet='', exclude='"', escape=True, embed=embed, error_msg='Empty or incomplete string')
+                part, value = self.parse_string(value[1:], alphabet='', exclude='"', embed=embed, error_msg='Empty or incomplete string')
                 if value[0] != '"':
                     raise ParseError('Incomplete string', value)
                 value = value[1:]
             else:
-                part, value = self.parse_string(value, alphabet='', exclude=end + '"' + string.whitespace, escape=True, embed=embed)
+                part, value = self.parse_string(value, alphabet='', exclude=end + '"' + string.whitespace, embed=embed)
             parts.append(part)
         return parts, value
