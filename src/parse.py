@@ -1,5 +1,4 @@
 import string
-from dataclasses import dataclass, field
 from . import nodes
 from .exceptions import MarkupError
 from .html import html
@@ -17,10 +16,10 @@ def error(msg: str) -> str:
     return f'<span class="error">&lt;{msg}&gt;</span>'
 
 
-@dataclass
 class Markup:
-    node_handlers: nodes.NodeHandlers = field(init=False, default_factory=nodes.make_node_handlers)
-    simple_nodes: nodes.SimpleNodes = field(init=False, default_factory=nodes.make_simple_nodes)
+    def __init__(self) -> None:
+        self.node_handlers = nodes.make_node_handlers()
+        self.simple_nodes = nodes.make_simple_nodes()
 
     def parse(self, string: str) -> str:
         output, remainder = self.parse_string(string, alphabet='', escape=True, embed=True)
