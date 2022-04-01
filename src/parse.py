@@ -16,6 +16,10 @@ def error(msg: str) -> str:
     return f'<span class="error">&lt;{msg}&gt;</span>'
 
 
+def is_valid_char(char: str, alphabet: str, exclude: str) -> bool:
+    return (not alphabet or char in alphabet) and char not in exclude
+
+
 class Markup:
     def __init__(self) -> None:
         self.node_handlers = nodes.make_node_handlers()
@@ -41,7 +45,7 @@ class Markup:
             elif embed and value[0] in (set(self.simple_nodes) | set(self.node_handlers)):
                 tag, value = self.parse_node(value)
                 out += tag
-            elif (not alphabet or value[0] in alphabet) and value[0] not in exclude:
+            elif is_valid_char(value[0], alphabet, exclude):
                 out += value[0]
                 value = value[1:]
             else:
