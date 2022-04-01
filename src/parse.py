@@ -27,12 +27,12 @@ class Markup:
         self.prefixes = ''.join(set(self.simple_nodes) | set(self.node_handlers))
 
     def parse(self, string: str) -> str:
-        output, remainder = self.parse_string(string, alphabet='')
+        output, remainder = self.parse_string(string)
         if remainder:
             ...
         return output
 
-    def parse_string(self, value: str, *, alphabet: str=STRING_CHARS, exclude: str='', error_msg: str='') -> tuple[str, str]:
+    def parse_string(self, value: str, *, alphabet: str='', exclude: str='', error_msg: str='') -> tuple[str, str]:
         out = ''
         while value and is_valid_char(value[0], alphabet, exclude):
             if value[0] == '\\':
@@ -55,16 +55,16 @@ class Markup:
     def parse_node(value: str) -> str:
         # $cmd#id.class.class[data]{text}
         prefix, value = value[0], value[1:]
-        command, value = self.parse_string(value, error_msg='Invalid command name')
+        command, value = self.parse_string(value, alphabet=STRING_CHARS, error_msg='Invalid command name')
 
         if value and value[0] == '#':
-            id, value = self.parse_string(value[1:], error_msg='Invalid id')
+            id, value = self.parse_string(value[1:], alphabet=STRING_CHARS, error_msg='Invalid id')
         else:
             id = None
 
         classes = []
         while value and value[0] == '.':
-            class_, value = self.parse_string(value[1:], error_msg='Invalid class')
+            class_, value = self.parse_string(value[1:], alphabet=STRING_CHARS, error_msg='Invalid class')
             classes.append(class_)
 
         if value and value[0] == '[':
@@ -101,11 +101,11 @@ class Markup:
                 if skip_whitespace:
                     continue
             elif value[0] == '"':
-                part, value = self.parse_string(value[1:], alphabet='', exclude=exclude + '"', error_msg='Empty or incomplete string')
+                part, value = self.parse_string(value[1:], exclude=exclude + '"', error_msg='Empty or incomplete string')
                 if value[0] != '"':
                     raise ParseError('Incomplete string', value)
                 value = value[1:]
             else:
-                part, value = self.parse_string(value, alphabet='', exclude=exclude + end + '"' + string.whitespace)
+                part, value = self.parse_string(value, exclude=exclude + end + '"' + string.whitespace)
             parts.append(part)
         return parts, value
