@@ -33,24 +33,20 @@ class Markup:
         return output
 
     def parse_string(self, value: str, *, alphabet: str=STRING_CHARS, exclude: str='', error_msg: str='') -> tuple[str, str]:
-        escape = is_valid_char('\\', alphabet, exclude)
-        embed = any(is_valid_char(char, alphabet, exclude) for char in self.prefixes)
         out = ''
-        while value:
-            if escape and value[0] == '\\':
+        while value and is_valid_char(value[0], alphabet, exclude):
+            if value[0] == '\\':
                 if len(value) <= 1:
                     raise ParseError('Incomplete escape sequence', value)
                 else:
                     out += value[:2]
                     value = value[2:]
-            elif embed and value[0] in self.prefixes:
+            elif value[0] in self.prefixes:
                 tag, value = self.parse_node(value)
                 out += tag
-            elif is_valid_char(value[0], alphabet, exclude):
+            else:
                 out += value[0]
                 value = value[1:]
-            else:
-                break
         if out:
             return out, value
         else:
