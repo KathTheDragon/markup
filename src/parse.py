@@ -52,7 +52,7 @@ class Markup:
         else:
             raise ParseError(error_msg, value)
 
-    def parse_node(value: str) -> str:
+    def parse_node(self, value: str) -> str:
         # $cmd#id.class.class[data]{text}
         prefix, value = value[0], value[1:]
         command, value = self.parse_string(value, alphabet=STRING_CHARS, error_msg='Invalid command name')
