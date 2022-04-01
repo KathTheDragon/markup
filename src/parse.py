@@ -71,13 +71,13 @@ class Markup:
             classes.append(class_)
 
         if value and value[0] == '[':
-            data, value = self.parse_list(value[1:], skip_whitespace=True, end=']', embed=False)
+            data, value = self.parse_list(value[1:], skip_whitespace=True, end=']')
             value = value[1:]
         else:
             data = []
 
         if value and value[0] == '{':
-            text, value = self.parse_list(value[1:], end='}')
+            text, value = self.parse_list(value[1:], end='}', embed=True)
             value = value[1:]
         else:
             text = None
@@ -96,7 +96,7 @@ class Markup:
         except Exception:
             return error(f'{type(e).__name__}: {e}'), value
 
-    def parse_list(self, value: str, *, skip_whitespace: bool=False, end: str='', embed: bool=True, error_msg: str='') -> tuple[list[str], str]:
+    def parse_list(self, value: str, *, skip_whitespace: bool=False, end: str='', embed: bool=False, error_msg: str='') -> tuple[list[str], str]:
         parts = []
         while value and value[0] not in end:
             if value[0] in string.whitespace:
