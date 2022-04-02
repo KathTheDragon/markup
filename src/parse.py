@@ -48,7 +48,7 @@ class Markup:
             else:
                 out += value[0]
                 value = value[1:]
-        if out:
+        if out or not error_msg:
             return out, value
         else:
             raise ParseError(error_msg, value)
@@ -102,11 +102,13 @@ class Markup:
                 if skip_whitespace:
                     continue
             elif value[0] == '"':
-                part, value = self.parse_string(value[1:], exclude=exclude + '"', error_msg='Empty or incomplete string')
-                if value[0] != '"':
+                part, value = self.parse_string(value[1:], exclude=exclude + '"')
+                if not value:
                     raise ParseError('Incomplete string', value)
+                elif value[0] != '"':
+                    raise ParseError('Invalid character', value)
                 value = value[1:]
             else:
-                part, value = self.parse_string(value, exclude=exclude + end + '"' + string.whitespace)
+                part, value = self.parse_string(value, exclude=exclude + end + '"' + string.whitespace, error_msg='Invalid character')
             parts.append(part)
         return parts, value
