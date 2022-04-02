@@ -27,10 +27,11 @@ class Markup:
         self.prefixes = ''.join(set(self.simple_nodes) | set(self.node_handlers))
 
     def parse(self, string: str) -> str:
-        output, remainder = self.parse_string(string)
-        if remainder:
-            ...
-        return output
+        try:
+            output, _ = self.parse_string(string)
+            return output
+        except ParseError as e:
+            return error(e.message)
 
     def parse_string(self, value: str, *, alphabet: str='', exclude: str='', error_msg: str='') -> tuple[str, str]:
         out = ''
