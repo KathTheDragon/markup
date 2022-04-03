@@ -85,7 +85,7 @@ class Markup:
                 if command in self.simple_nodes.get(prefix, []):
                     handler = nodes.simple_node
                 else:
-                    raise MarkupError(f'Invalid node: {prefix}{command}')
+                    raise nodes.MarkupError(f'Invalid node: {prefix}{command}')
 
             return handler(command, id, classes, data, text), value
         except nodes.MarkupError as e:

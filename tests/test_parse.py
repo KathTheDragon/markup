@@ -5,7 +5,7 @@ from .utils import staticmethods
 skip = pytest.mark.skip
 xfail = pytest.mark.xfail
 
-from markup.src import exceptions, html, nodes, parse
+from markup.src import html, nodes, parse
 
 @nodes.handler
 def _test_node(command: str, attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes._HandlerReturn:
@@ -15,7 +15,7 @@ def _test_node(command: str, attributes: html.Attributes, data: list[str], text:
 
 @nodes.handler
 def error_node(command: str, attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes._HandlerReturn:
-    raise exceptions.MarkupError('This always errors')
+    raise nodes.MarkupError('This always errors')
 
 
 markup = parse.Markup()
