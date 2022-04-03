@@ -16,6 +16,12 @@ class MarkupError(Exception):
         super().__init__(message)
 
 
+class InvalidData(MarkupError):
+    def __init__(self) -> None:
+        self.message = 'Invalid data field'
+        super().__init__()
+
+
 def handler(func: _Handler) -> Handler:
     @wraps(func)
     def wrapper(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> str:
@@ -30,13 +36,19 @@ def handler(func: _Handler) -> Handler:
 
 @handler
 def simple_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+    if data:
+        raise InvalidData()
     return command, attributes, text
 
 
 @handler
 def link_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+    if not data:
+        raise InvalidData()
     if data[0] == '_blank':
         attributes['target'] = data.pop(0)
+    if len(data) != 1:
+        raise InvalidData()
     url, = data
     attributes['href'], = url
     if text is None:
@@ -47,6 +59,8 @@ def link_node(command: str, attributes: Attributes, data: list[str], text: list[
 
 @handler
 def section_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+    if len(data) != 2:
+        raise InvalidData()
     level, title = data
 
     if id is None:
@@ -66,6 +80,8 @@ def section_node(command: str, attributes: Attributes, data: list[str], text: li
 
 @handler
 def footnote_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+    if len(data) != 1:
+        raise InvalidData()
     number, = data
     attributes['class'].append('footnote')
     prefix = html('sup', {}, number)
@@ -82,7 +98,7 @@ def list_node(command: str, attributes: Attributes, data: list[str], text: list[
         elif attr == 'reversed':
             attributes['reversed'] = True
         else:
-            raise MarkupError('Invalid tag data')
+            raise InvalidData()
 
     if data:
         tag = 'ol'
@@ -110,6 +126,8 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
             headers = attr.removeprefix('headers=').split(',')
             header_row = 'rows' in headers
             header_col = 'cols' in headers
+        else:
+            raise InvalidData()
 
     parts = partition(text, '//')
     if len(parts) == 1:
