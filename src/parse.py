@@ -90,7 +90,7 @@ class Markup:
             return handler(command, id, classes, data, text), value
         except nodes.MarkupError as e:
             return error(e.message), value
-        except Exception:
+        except Exception as e:
             return error(f'{type(e).__name__}: {e}'), value
 
     def parse_list(self, value: str, *, skip_whitespace: bool=False, exclude: str='', end: str='', error_msg: str='') -> tuple[list[str], str]:
