@@ -18,8 +18,10 @@ class MarkupError(Exception):
 
 class InvalidData(MarkupError):
     def __init__(self) -> None:
-        self.message = 'Invalid data field'
-        super().__init__()
+        super().__init__('Invalid data field')
+
+    def __str__(self) -> str:
+        return ''
 
 
 def handler(func: _Handler) -> Handler:
