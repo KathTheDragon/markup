@@ -52,7 +52,7 @@ def link_node(command: str, attributes: Attributes, data: list[str], text: list[
     if len(data) != 1:
         raise InvalidData()
     url, = data
-    attributes['href'], = url
+    attributes['href'] = url
     if text is None:
         text = [url]
 
