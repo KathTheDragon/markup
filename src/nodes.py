@@ -1,7 +1,6 @@
 import re
 from functools import wraps
 from typing import Callable
-from .exceptions import MarkupError
 from .html import Attributes, html
 from .utils import partition, strip
 
@@ -10,6 +9,12 @@ _HandlerReturn = tuple[str, Attributes, list[str] | None]
 _Handler = Callable[_HandlerArgs, _HandlerReturn]
 HandlerArgs = [str, str | None, list[str], list[str], list[str] | None]
 Handler = Callable[HandlerArgs, str]
+
+class MarkupError(Exception):
+    def __init__(self, message: str) -> None:
+        self.message = message
+        super().__init__(message)
+
 
 def handler(func: _Handler) -> Handler:
     @wraps(func)

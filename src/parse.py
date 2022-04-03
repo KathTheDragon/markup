@@ -1,6 +1,5 @@
 import string
 from . import nodes
-from .exceptions import MarkupError
 from .html import html
 
 class ParseError(Exception):
@@ -89,7 +88,7 @@ class Markup:
                     raise MarkupError(f'Invalid node: {prefix}{command}')
 
             return handler(command, id, classes, data, text), value
-        except MarkupError as e:
+        except nodes.MarkupError as e:
             return error(e.message), value
         except Exception:
             return error(f'{type(e).__name__}: {e}'), value
