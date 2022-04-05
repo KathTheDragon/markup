@@ -65,8 +65,8 @@ def section_node(command: str, attributes: Attributes, data: list[str], text: li
         raise InvalidData()
     level, title = data
 
-    if id is None:
-        id = f'sect-{title.lower().replace(" ", "-")}'
+    if attributes['id'] is None:
+        attributes['id'] = f'sect-{title.lower().replace(" ", "-")}'
 
     if level not in ('1', '2', '3', '4', '5', '6'):
         raise MarkupError('Invalid level')
