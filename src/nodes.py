@@ -71,7 +71,7 @@ def section_node(command: str, attributes: Attributes, data: list[str], text: li
     if level not in ('1', '2', '3', '4', '5', '6'):
         raise MarkupError('Invalid level')
     heading = html(f'h{level}', {}, title)
-    if text[0].startswith('\n'):
+    if text and text[0].startswith('\n'):
         indent = re.match(r'\n( *)', text[0]).group(1)
         text.insert(0, f'\n{indent}{heading}\n')
     else:
