@@ -45,21 +45,21 @@ class Test_table_node:
         assert table.table_node('table', data=['headers=rows,cols'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><th>foo</th><th>bar</th></tr><tr><th>baz</th><td>bif</td></tr></table>'
 
     def test_left_angle_brackets_increase_colspan_of_cell_to_the_left():
-        assert table.table_node('table', text=['foo', '|', '<', '|', '<']) == '<table><tr><td colspan=3>foo</td></tr></table>'
+        assert table.table_node('table', text=['foo', '|', '<', '|', '<']) == '<table><tr><td colspan="3">foo</td></tr></table>'
 
     def test_row_cannot_begin_with_left_angle_bracket():
         with raises(table.MarkupError):
             table.table_node('table', text=['<', '|', '<'])
 
     def test_carets_increase_rowspan_of_cell_above():
-        assert table.table_node('table', text=['foo', '/', '^', '/', '^']) == '<table><tr><td rowspan=3>foo</td></tr></table>'
+        assert table.table_node('table', text=['foo', '/', '^', '/', '^']) == '<table><tr><td rowspan="3">foo</td></tr></table>'
 
     def test_column_cannot_begin_with_caret():
         with raises(table.MarkupError):
             table.table_node('table', text=['^', '/', '^'])
 
     def test_carets_under_a_merged_cell_increase_rowspan_of_cell():
-        assert table.table_node('table', text=['foo', '|', '<', '|', '<', '/', '^', '|', '^', '|', '^']) == '<table><tr><td rowspan=2 colspan=3>foo</td></tr></table>'
+        assert table.table_node('table', text=['foo', '|', '<', '|', '<', '/', '^', '|', '^', '|', '^']) == '<table><tr><td rowspan="2" colspan="3">foo</td></tr></table>'
 
     def test_must_have_correct_number_of_carets_for_merged_cell():
         with raises(table.MarkupError):

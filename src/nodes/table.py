@@ -35,9 +35,9 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
                 leading, cell, trailing = mcell['data']
                 attributes = {}
                 if mcell['rows'] != 1:
-                    attributes['rowspan'] = mcell['rows']
+                    attributes['rowspan'] = str(mcell['rows'])
                 if mcell['cols'] != 1:
-                    attributes['colspan'] = mcell['cols']
+                    attributes['colspan'] = str(mcell['cols'])
                 row.extend([leading, html(tag, attributes, cell), trailing])
         if row:
             rows.append(html('tr', {}, row))
