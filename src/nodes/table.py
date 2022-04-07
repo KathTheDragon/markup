@@ -10,8 +10,6 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
     for attr in data:
         if attr.startswith('headers='):
             headers = attr.removeprefix('headers=').split(',')
-            header_row = 'rows' in headers
-            header_col = 'cols' in headers
         else:
             raise InvalidData()
 
@@ -25,20 +23,8 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
     table = [[strip(cell) for cell in partition(row, '|')] for row in partition(text, '/')]
     if len(set(map(len, table))) != 1:
         raise MarkupError('Table rows must be the same size')
-    for mrow in _merge_table(table):
-        row = []
-        for mcell in mrow:
-            if mcell['data'] is not None:
-                tag = 'th' if (header_row and not rows or header_col and not row) else 'td'
-                leading, cell, trailing = mcell['data']
-                cell_attributes = {}
-                if mcell['rows'] != 1:
-                    cell_attributes['rowspan'] = str(mcell['rows'])
-                if mcell['cols'] != 1:
-                    cell_attributes['colspan'] = str(mcell['cols'])
-                row.extend([leading, html(tag, cell_attributes, cell), trailing])
-        if row:
-            rows.append(html('tr', {}, row))
+    for num, row in enumerate(_merge_table(table)):
+        rows.append(_make_tr(row, headers=headers, row_num=num))
     return 'table', attributes, rows
 
 
@@ -88,3 +74,27 @@ def _merge_up(table: list[list[dict]], row: list[dict]) -> list[list[dict]]:
 
     table.append(row)
     return table
+
+
+def _make_tr(row: list[dict], *, headers: list[str], row_num: int) -> str:
+    cells = []
+    for num, cell in enumerate(row):
+        cells.extend(_make_td(cell, headers=headers, row_num=row_num, col_num=num))
+    if cells:
+        return html('tr', {}, cells)
+    else:
+        return ''
+
+
+def _make_td(cell: dict, *, headers: list[str], row_num: int, col_num: int) -> list[str]:
+    if cell['data'] is not None:
+        tag = 'th' if ('rows' in headers and not row_num or 'cols' in headers and not col_num) else 'td'
+        attributes = {}
+        if cell['rows'] != 1:
+            attributes['rowspan'] = str(cell['rows'])
+        if cell['cols'] != 1:
+            attributes['colspan'] = str(cell['cols'])
+        leading, content, trailing = cell['data']
+        return [leading, html(tag, attributes, content), trailing]
+    else:
+        return []
