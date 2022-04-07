@@ -70,7 +70,7 @@ def section_node(command: str, attributes: Attributes, data: list[str], text: li
 
     if level not in ('1', '2', '3', '4', '5', '6'):
         raise MarkupError('Invalid level')
-    heading = html(f'h{level}', {}, title)
+    heading = html(f'h{level}', {}, [title])
     text = text or []
     if text and text[0].startswith('\n'):
         indent = re.match(r'\n( *)', text[0]).group(1)
@@ -87,7 +87,7 @@ def footnote_node(command: str, attributes: Attributes, data: list[str], text: l
         raise InvalidData()
     number, = data
     attributes['class'].append('footnote')
-    prefix = html('sup', {}, number)
+    prefix = html('sup', {}, [number])
     text = text or []
     text.insert(0, prefix)
 
@@ -117,7 +117,7 @@ def list_node(command: str, attributes: Attributes, data: list[str], text: list[
             leading, part, trailing = strip(part)
             if leading:
                 text.append(leading)
-            text.append(html('li', {}, ''.join(part)))
+            text.append(html('li', {}, part))
             if trailing:
                 text.append(trailing)
 
@@ -185,7 +185,7 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
         merged.append(merged_row)
     rows = []
     if caption is not None:
-        rows.append(html('caption', {}, ''.join(caption)))
+        rows.append(html('caption', {}, caption))
     for mrow in merged:
         row = []
         for mcell in mrow:
@@ -197,9 +197,9 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
                     attributes['rowspan'] = mcell['rows']
                 if mcell['cols'] != 1:
                     attributes['colspan'] = mcell['cols']
-                row.extend([leading, html(tag, attributes, ''.join(cell)), trailing])
+                row.extend([leading, html(tag, attributes, cell), trailing])
         if row:
-            rows.append(html('tr', {}, ''.join(row)))
+            rows.append(html('tr', {}, row))
     return 'table', attributes, rows
 
 
