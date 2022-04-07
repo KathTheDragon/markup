@@ -33,12 +33,12 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
             if mcell['data'] is not None:
                 tag = 'th' if (header_row and not rows or header_col and not row) else 'td'
                 leading, cell, trailing = mcell['data']
-                attributes = {}
+                cell_attributes = {}
                 if mcell['rows'] != 1:
-                    attributes['rowspan'] = str(mcell['rows'])
+                    cell_attributes['rowspan'] = str(mcell['rows'])
                 if mcell['cols'] != 1:
-                    attributes['colspan'] = str(mcell['cols'])
-                row.extend([leading, html(tag, attributes, cell), trailing])
+                    cell_attributes['colspan'] = str(mcell['cols'])
+                row.extend([leading, html(tag, cell_attributes, cell), trailing])
         if row:
             rows.append(html('tr', {}, row))
     return 'table', attributes, rows
