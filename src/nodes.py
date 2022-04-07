@@ -107,15 +107,17 @@ def list_node(command: str, attributes: Attributes, data: list[str], text: list[
     else:
         tag = 'ul'
 
-    parts = partition(text, '/')
-    text = []
-    for part in parts:
-        leading, part, trailing = strip(part)
-        if leading:
-            text.append(leading)
-        text.append(html('li', {}, ''.join(part)))
-        if trailing:
-            text.append(trailing)
+    # Don't make list items if text is empty
+    if text:
+        parts = partition(text, '/')
+        text = []
+        for part in parts:
+            leading, part, trailing = strip(part)
+            if leading:
+                text.append(leading)
+            text.append(html('li', {}, ''.join(part)))
+            if trailing:
+                text.append(trailing)
 
     return tag, attributes, text
 
