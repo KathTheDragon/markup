@@ -25,19 +25,23 @@ class Test_partition:
 @staticmethods
 class Test_strip:
     def test_separates_leading_and_trailing_whitespace_from_list():
-        strings = ['  ', 'a', 'b', 'c', '\n\r\t']
-        assert utils.strip(strings) == ('  ', ['a', 'b', 'c'], '\n\r\t')
+        strings = ['\r  ', 'a', 'b', 'c', '\n\r\t']
+        assert utils.strip(strings) == ('\r  ', ['a', 'b', 'c'], '\n\r\t')
+
+    def test_trims_spaces_and_tabs_from_left_edge():
+        strings = ['  \r', 'a', 'b', 'c', '\t\n\r']
+        assert utils.strip(strings) == ('\r', ['a', 'b', 'c'], '\n\r')
 
     def test_returns_empty_strings_if_no_leading_or_trailing_whitespace():
-        strings = ['a', 'b', 'c', ' ']
-        assert utils.strip(strings) == ('', ['a', 'b', 'c'], ' ')
+        strings = ['a', 'b', 'c', '\n']
+        assert utils.strip(strings) == ('', ['a', 'b', 'c'], '\n')
 
-        strings = [' ', 'a', 'b', 'c']
-        assert utils.strip(strings) == (' ', ['a', 'b', 'c'], '')
+        strings = ['\n', 'a', 'b', 'c']
+        assert utils.strip(strings) == ('\n', ['a', 'b', 'c'], '')
 
         strings = ['a', 'b', 'c']
         assert utils.strip(strings) == ('', ['a', 'b', 'c'], '')
 
     def test_assumes_leading_whitespace():
-        strings = [' ']
-        assert utils.strip(strings) == (' ', [], '')
+        strings = ['\n']
+        assert utils.strip(strings) == ('\n', [], '')
