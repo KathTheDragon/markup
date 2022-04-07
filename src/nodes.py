@@ -206,7 +206,7 @@ def make_simple_nodes() -> SimpleNodes:
     return {
         '$': [
             'br', 'blockquote', 'dl', 'dt', 'dd', 'div', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-            'p', 'sup', 'sub', 'strong',
+            'hr', 'p', 'sup', 'sub', 'strong',
         ],
     }
 
