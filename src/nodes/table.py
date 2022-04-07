@@ -6,7 +6,7 @@ from ..utils import partition, strip
 
 @handler
 def table_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
-    header_row = header_col = False
+    headers = []
     for attr in data:
         if attr.startswith('headers='):
             headers = attr.removeprefix('headers=').split(',')
