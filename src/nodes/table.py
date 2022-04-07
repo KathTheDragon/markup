@@ -43,11 +43,7 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
 
 
 def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dict]]:
-    return reduce(_merge_up, map(_merge_row, table), [])
-
-
-def _merge_row(row: list[tuple[str, list[str], str]]) -> list[dict]:
-    return reduce(_merge_left, row, [])
+    return reduce(_merge_up, map(lambda row: reduce(_merge_left, row, []), table), [])
 
 
 def _merge_left(row: list[dict], cell: tuple[str, list[str], str]) -> list[dict]:
