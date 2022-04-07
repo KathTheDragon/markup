@@ -50,17 +50,17 @@ def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dic
         col = 0
         merged_row = []
         for leading, cell, trailing in row:
-            if cell == '<':
+            if cell == ['<']:
                 if not merged_row:
                     raise MarkupError('Invalid cell merge')
                 merged_row[-1]['cols'] += 1
-            elif cell == '^':
-                if merged_row[-1]['data'] == ('', '^', ''):
+            elif cell == ['^']:
+                if merged_row and merged_row[-1]['data'] == ('', ['^'], ''):
                     merged_row[-1]['cols'] += 1
                 else:
                     if merged_row:
                         col += merged_row[-1]['cols']
-                    merged_row.append({'data': ('', '^', ''), 'rows': 1, 'cols': 1})
+                    merged_row.append({'data': ('', ['^'], ''), 'rows': 1, 'cols': 1})
                 for mrow in reversed(merged):
                     mcol = 0
                     for mcell in mrow:
@@ -81,7 +81,7 @@ def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dic
                 if merged_row:
                     col += merged_row[-1]['cols']
                 merged_row.append({'data': (leading, cell, trailing), 'rows': 1, 'cols': 1})
-        if any(cell['data'] == ('', '^', '') for cell in merged_row):
+        if any(cell['data'] == ('', ['^'], '') for cell in merged_row):
             raise MarkupError('Invalid cell merge')
         merged.append(merged_row)
     return merged
