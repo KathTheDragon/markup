@@ -71,6 +71,7 @@ def section_node(command: str, attributes: Attributes, data: list[str], text: li
     if level not in ('1', '2', '3', '4', '5', '6'):
         raise MarkupError('Invalid level')
     heading = html(f'h{level}', {}, title)
+    text = text or []
     if text and text[0].startswith('\n'):
         indent = re.match(r'\n( *)', text[0]).group(1)
         text.insert(0, f'\n{indent}{heading}\n')
@@ -87,6 +88,7 @@ def footnote_node(command: str, attributes: Attributes, data: list[str], text: l
     number, = data
     attributes['class'].append('footnote')
     prefix = html('sup', {}, number)
+    text = text or []
     text.insert(0, prefix)
 
     return 'p', attributes, text
@@ -119,7 +121,7 @@ def list_node(command: str, attributes: Attributes, data: list[str], text: list[
             if trailing:
                 text.append(trailing)
 
-    return tag, attributes, text
+    return tag, attributes, text or []
 
 
 @handler
@@ -133,7 +135,7 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
         else:
             raise InvalidData()
 
-    parts = partition(text, '//')
+    parts = partition(text or [], '//')
     if len(parts) == 1:
         caption, text = None, parts[0]
     else:
