@@ -14,20 +14,17 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
         else:
             raise InvalidData()
 
-    parts = partition(text or [], '//')
-    if len(parts) == 1:
-        caption, text = None, parts[0]
-    else:
-        caption, text = parts
+    text = text or []
+    rows = []
+
+    if '//' in text:
+        caption, text = partition(text, '//')
+        rows.append(html('caption', {}, caption))
 
     table = [[strip(cell) for cell in partition(row, '|')] for row in partition(text, '/')]
     if len(set(map(len, table))) != 1:
         raise MarkupError('Table rows must be the same size')
-    merged = _merge_table(table)
-    rows = []
-    if caption is not None:
-        rows.append(html('caption', {}, caption))
-    for mrow in merged:
+    for mrow in _merge_table(table):
         row = []
         for mcell in mrow:
             if mcell['data'] is not None:
