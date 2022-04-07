@@ -1,3 +1,4 @@
+from functools import reduce
 from .handler import handler, _HandlerReturn
 from .exceptions import MarkupError, InvalidData
 from ..html import Attributes, html
@@ -42,17 +43,11 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
 
 
 def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dict]]:
-    merged = []
-    for row in table:
-        merged = _merge_up(merged, _merge_row(row))
-    return merged
+    return reduce(_merge_up, map(_merge_row, table), [])
 
 
 def _merge_row(row: list[tuple[str, list[str], str]]) -> list[dict]:
-    merged_row = []
-    for cell in row:
-        merged_row = _merge_left(merged_row, cell)
-    return merged_row
+    return reduce(_merge_left, row, [])
 
 
 def _merge_left(row: list[dict], cell: tuple[str, list[str], str]) -> list[dict]:
