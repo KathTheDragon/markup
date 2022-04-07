@@ -26,12 +26,12 @@ class InvalidData(MarkupError):
 
 def handler(func: _Handler) -> Handler:
     @wraps(func)
-    def wrapper(command: str, id: str | None, classes: list[str], data: list[str], text: list[str] | None) -> str:
+    def wrapper(command: str, id: str | None=None, classes: list[str]=None, data: list[str]=None, text: list[str] | None=None) -> str:
         attributes = {
             'id': id,
-            'class': classes,
+            'class': classes or [],
         }
-        return html(*func(command, attributes, data, text))
+        return html(*func(command, attributes, data or [], text))
 
     return wrapper
 
