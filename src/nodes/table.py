@@ -44,20 +44,26 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
 def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dict]]:
     merged = []
     for row in table:
-        col = 0
         merged_row = []
         for leading, cell, trailing in row:
             if cell == ['<']:
-                if not merged_row:
+                if not merged_row or merged_row[-1]['data'] == ('', ['^'], ''):
                     raise MarkupError('Invalid cell merge')
                 merged_row[-1]['cols'] += 1
             elif cell == ['^']:
-                if merged_row and merged_row[-1]['data'] == ('', ['^'], ''):
-                    merged_row[-1]['cols'] += 1
-                else:
-                    if merged_row:
-                        col += merged_row[-1]['cols']
-                    merged_row.append({'data': ('', ['^'], ''), 'rows': 1, 'cols': 1})
+                merged_row.append({'data': ('', ['^'], ''), 'rows': 1, 'cols': 1})
+            elif cell == ['.']:
+                if not merged_row or merged_row[-1]['data'] != ('', ['^'], ''):
+                    raise MarkupError('Invalid cell merge')
+                merged_row[-1]['cols'] += 1
+            else:
+                merged_row.append({'data': (leading, cell, trailing), 'rows': 1, 'cols': 1})
+
+        col = 0
+        for cell in merged_row:
+            if cell['data'] == ('', ['^'], ''):
+                if not merged:
+                    raise MarkupError('Invalid cell merge')
                 for mrow in reversed(merged):
                     mcol = 0
                     for mcell in mrow:
@@ -68,17 +74,13 @@ def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dic
                         else:
                             mcol += mcell['cols']
                     if mcell['data'] is not None:
-                        if mcell['cols'] == merged_row[-1]['cols']:
+                        if mcell['cols'] == cell['cols']:
                             mcell['rows'] += 1
-                            merged_row[-1]['data'] = None
+                            cell['data'] = None
                             break
                         else:
                             raise MarkupError('Misaligned table cell')
-            else:
-                if merged_row:
-                    col += merged_row[-1]['cols']
-                merged_row.append({'data': (leading, cell, trailing), 'rows': 1, 'cols': 1})
-        if any(cell['data'] == ('', ['^'], '') for cell in merged_row):
-            raise MarkupError('Invalid cell merge')
+            col += cell['cols']
+
         merged.append(merged_row)
     return merged

@@ -58,13 +58,13 @@ class Test_table_node:
         with raises(table.MarkupError):
             table.table_node('table', text=['^', '/', '^'])
 
-    def test_carets_under_a_merged_cell_increase_rowspan_of_cell():
-        assert table.table_node('table', text=['foo', '|', '<', '|', '<', '/', '^', '|', '^', '|', '^']) == '<table><tr><td rowspan="2" colspan="3">foo</td></tr></table>'
+    def test_caret_under_a_merged_cell_continued_by_dots_and_increase_rowspan_of_cell():
+        assert table.table_node('table', text=['foo', '|', '<', '|', '<', '/', '^', '|', '.', '|', '.']) == '<table><tr><td rowspan="2" colspan="3">foo</td></tr></table>'
 
-    def test_must_have_correct_number_of_carets_for_merged_cell():
+    def test_must_have_correct_number_of_carets_and_dots_for_merged_cell():
         with raises(table.MarkupError):
-            table.table_node('table', text=['foo', '|', '<', '|', '<', '/', '^', '|', '^', '|', 'bar'])
+            table.table_node('table', text=['foo', '|', '<', '|', '<', '/', '^', '|', '.', '|', 'bar'])
 
-    def test_carets_must_be_aligned_with_start_of_merged_cell():
+    def test_caret_must_be_aligned_with_start_of_merged_cell():
         with raises(table.MarkupError):
-            table.table_node('table', text=['foo', '|', '<', '|', '<', '/', 'bar', '|', '^', '|', '^'])
+            table.table_node('table', text=['foo', '|', '<', '|', '<', '/', 'bar', '|', '^', '|', '.'])
