@@ -44,43 +44,56 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
 def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dict]]:
     merged = []
     for row in table:
-        merged_row = []
-        for leading, cell, trailing in row:
-            if cell == ['<']:
-                if not merged_row or merged_row[-1]['data'] == ('', ['^'], ''):
-                    raise MarkupError('Invalid cell merge')
-                merged_row[-1]['cols'] += 1
-            elif cell == ['^']:
-                merged_row.append({'data': ('', ['^'], ''), 'rows': 1, 'cols': 1})
-            elif cell == ['.']:
-                if not merged_row or merged_row[-1]['data'] != ('', ['^'], ''):
-                    raise MarkupError('Invalid cell merge')
-                merged_row[-1]['cols'] += 1
-            else:
-                merged_row.append({'data': (leading, cell, trailing), 'rows': 1, 'cols': 1})
-
-        col = 0
-        for cell in merged_row:
-            if cell['data'] == ('', ['^'], ''):
-                if not merged:
-                    raise MarkupError('Invalid cell merge')
-                for mrow in reversed(merged):
-                    mcol = 0
-                    for mcell in mrow:
-                        if mcol == col:
-                            break
-                        elif mcol > col:
-                            raise MarkupError('Misaligned table cell')
-                        else:
-                            mcol += mcell['cols']
-                    if mcell['data'] is not None:
-                        if mcell['cols'] == cell['cols']:
-                            mcell['rows'] += 1
-                            cell['data'] = None
-                            break
-                        else:
-                            raise MarkupError('Misaligned table cell')
-            col += cell['cols']
-
-        merged.append(merged_row)
+        merged = _merge_up(merged, _merge_row(row))
     return merged
+
+
+def _merge_row(row: list[tuple[str, list[str], str]]) -> list[dict]:
+    merged_row = []
+    for cell in row:
+        merged_row = _merge_left(merged_row, cell)
+    return merged_row
+
+
+def _merge_left(row: list[dict], cell: tuple[str, list[str], str]) -> list[dict]:
+    if cell[1] == ['<']:
+        if not row or row[-1]['data'] is None:
+            raise MarkupError('Invalid cell merge')
+        row[-1]['cols'] += 1
+    elif cell[1] == ['^']:
+        row.append({'data': None, 'rows': 1, 'cols': 1})
+    elif cell[1] == ['.']:
+        if not row or row[-1]['data'] is not None:
+            raise MarkupError('Invalid cell merge')
+        row[-1]['cols'] += 1
+    else:
+        row.append({'data': cell, 'rows': 1, 'cols': 1})
+
+    return row
+
+
+def _merge_up(table: list[list[dict]], row: list[dict]) -> list[list[dict]]:
+    col = 0
+    for cell in row:
+        if cell['data'] is None:
+            if not table:
+                raise MarkupError('Invalid cell merge')
+            for trow in reversed(table):
+                tcol = 0
+                for tcell in trow:
+                    if tcol == col:
+                        break
+                    elif tcol > col:
+                        raise MarkupError('Misaligned table cell')
+                    else:
+                        tcol += tcell['cols']
+                if tcell['data'] is not None:
+                    if tcell['cols'] == cell['cols']:
+                        tcell['rows'] += 1
+                        break
+                    else:
+                        raise MarkupError('Misaligned table cell')
+        col += cell['cols']
+
+    table.append(row)
+    return table
