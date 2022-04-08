@@ -22,6 +22,9 @@ class Test_table_node:
     def test_caption_can_be_added_before_table_body_with_double_slash():
         assert table.table_node('table', text=['foo', '//', 'bar']) == '<table><caption>foo</caption><tr><td>bar</td></tr></table>'
 
+    def test_leading_and_trailing_whitespace_around_caption_placed_outside_tag():
+        assert table.table_node('table', text=['  \n  ', 'foo', '\t\r\t', '//', 'bar']) == '<table>\n  <caption>foo</caption>\r\t<tr><td>bar</td></tr></table>'
+
     def test_table_rows_separated_by_single_slash():
         assert table.table_node('table', text=['foo', '/', 'bar', '/', 'baz']) == '<table><tr><td>foo</td></tr><tr><td>bar</td></tr><tr><td>baz</td></tr></table>'
 

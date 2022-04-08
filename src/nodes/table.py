@@ -20,7 +20,8 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
 
     if '//' in text:
         caption, text = partition(text, '//')
-        rows.append(html('caption', {}, caption))
+        leading, caption, trailing = strip(caption)
+        rows.extend([leading, html('caption', {}, caption), trailing])
 
     table = [[strip(cell) for cell in partition(row, '|')] for row in partition(text, '/')]
     if len(set(map(len, table))) != 1:
