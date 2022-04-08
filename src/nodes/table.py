@@ -36,13 +36,11 @@ def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dic
 
 def _merge_left(row: list[dict], cell: tuple[str, list[str], str]) -> list[dict]:
     if cell[1] == ['<']:
-        if not row or row[-1]['data'] is None:
+        if not row or row[-1]['data'][1] == ['^']:
             raise MarkupError('Invalid cell merge')
         row[-1]['cols'] += 1
-    elif cell[1] == ['^']:
-        row.append({'data': None, 'rows': 1, 'cols': 1})
     elif cell[1] == ['.']:
-        if not row or row[-1]['data'] is not None:
+        if not row or row[-1]['data'][1] != ['^']:
             raise MarkupError('Invalid cell merge')
         row[-1]['cols'] += 1
     else:
@@ -54,7 +52,7 @@ def _merge_left(row: list[dict], cell: tuple[str, list[str], str]) -> list[dict]
 def _merge_up(table: list[list[dict]], row: list[dict]) -> list[list[dict]]:
     col = 0
     for cell in row:
-        if cell['data'] is None:
+        if cell['data'][1] == ['^']:
             if not table:
                 raise MarkupError('Invalid cell merge')
             for trow in reversed(table):
@@ -66,7 +64,7 @@ def _merge_up(table: list[list[dict]], row: list[dict]) -> list[list[dict]]:
                         raise MarkupError('Misaligned table cell')
                     else:
                         tcol += tcell['cols']
-                if tcell['data'] is not None:
+                if tcell['data'][1] != ['^']:
                     if tcell['cols'] == cell['cols']:
                         tcell['rows'] += 1
                         break
@@ -89,7 +87,7 @@ def _make_tr(row: list[dict], *, headers: set[str], row_num: int) -> str:
 
 
 def _make_td(cell: dict, *, headers: set[str], row_num: int, col_num: int) -> list[str]:
-    if cell['data'] is not None:
+    if cell['data'][1] != ['^']:
         tag = 'th' if ('rows' in headers and not row_num or 'cols' in headers and not col_num) else 'td'
         attributes = {}
         if cell['rows'] != 1:
