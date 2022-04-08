@@ -90,7 +90,7 @@ def _make_tr(row: list[dict], *, headers: set[str], row_num: int) -> str:
 
 def _make_td(cell: dict, *, headers: set[str], row_num: int, col_num: int) -> list[str]:
     if cell['data'][1] != ['^']:
-        tag = 'th' if ('rows' in headers and not row_num or 'cols' in headers and not col_num) else 'td'
+        tag = 'th' if ('cols' in headers and not row_num or 'rows' in headers and not col_num) else 'td'
         attributes = {}
         if cell['rows'] != 1:
             attributes['rowspan'] = str(cell['rows'])

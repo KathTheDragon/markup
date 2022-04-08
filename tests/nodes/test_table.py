@@ -180,13 +180,13 @@ class Test_make_td:
         cell = {'data': ('', ['^'], ''), 'rows': 1, 'cols': 1}
         assert table._make_td(cell, headers=set(), row_num=1, col_num=1) == []
 
-    def test_tag_is_th_if_row_0_and_rows_in_headers():
+    def test_tag_is_th_if_row_0_and_cols_in_headers():
         cell = {'data': ('', ['foo'], ''), 'rows': 1, 'cols': 1}
-        assert table._make_td(cell, headers={'rows'}, row_num=0, col_num=1) == ['', '<th>foo</th>', '']
+        assert table._make_td(cell, headers={'cols'}, row_num=0, col_num=1) == ['', '<th>foo</th>', '']
 
-    def test_tag_is_th_if_col_0_and_cols_in_headers():
+    def test_tag_is_th_if_col_0_and_rows_in_headers():
         cell = {'data': ('', ['foo'], ''), 'rows': 1, 'cols': 1}
-        assert table._make_td(cell, headers={'cols'}, row_num=1, col_num=0) == ['', '<th>foo</th>', '']
+        assert table._make_td(cell, headers={'rows'}, row_num=1, col_num=0) == ['', '<th>foo</th>', '']
 
     def test_tag_has_rowspan_attribute_if_cell_spans_more_than_1_row():
         cell = {'data': ('', ['foo'], ''), 'rows': 3, 'cols': 1}
