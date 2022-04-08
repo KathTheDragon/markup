@@ -1,11 +1,12 @@
 from functools import reduce
+from typing import Optional
 from .handler import handler, _HandlerReturn
 from .exceptions import MarkupError, InvalidData
 from ..html import Attributes, html
 from ..utils import partition, strip
 
 @handler
-def table_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+def table_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     headers = []
     for attr in data:
         if attr.startswith('headers='):

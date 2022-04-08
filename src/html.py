@@ -1,7 +1,9 @@
-Attribute = str | bool | list[str] | None
+from typing import Optional, Union
+
+Attribute = Union[str, bool, list[str], None]
 Attributes = dict[str, Attribute]
 
-def html(tag: str, attributes: Attributes={}, content: list[str] | None=None) -> str:
+def html(tag: str, attributes: Attributes={}, content: Optional[list[str]]=None) -> str:
     open = f'{tag} {format_attributes(attributes)}'.strip()
     close = tag
 

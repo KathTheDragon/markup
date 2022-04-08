@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 from .handler import handler, Handler, _HandlerReturn
 from .exceptions import MarkupError, InvalidData
 from .table import table_node
@@ -6,14 +7,14 @@ from ..html import Attributes, html
 from ..utils import partition, strip
 
 @handler
-def simple_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+def simple_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     if data:
         raise InvalidData()
     return command, attributes, text
 
 
 @handler
-def link_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+def link_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     if not data:
         raise InvalidData()
     if data[0] == '_blank':
@@ -29,7 +30,7 @@ def link_node(command: str, attributes: Attributes, data: list[str], text: list[
 
 
 @handler
-def section_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+def section_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     if len(data) != 2:
         raise InvalidData()
     level, title = data
@@ -51,7 +52,7 @@ def section_node(command: str, attributes: Attributes, data: list[str], text: li
 
 
 @handler
-def footnote_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+def footnote_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     if len(data) != 1:
         raise InvalidData()
     number, = data
@@ -64,7 +65,7 @@ def footnote_node(command: str, attributes: Attributes, data: list[str], text: l
 
 
 @handler
-def list_node(command: str, attributes: Attributes, data: list[str], text: list[str] | None) -> _HandlerReturn:
+def list_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     for attr in data:
         if attr.startswith('start='):
             attributes['start'] = attr.removeprefix('start=')
