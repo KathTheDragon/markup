@@ -23,7 +23,10 @@ class Markup:
     def __init__(self) -> None:
         self.node_handlers = nodes.make_node_handlers()
         self.simple_nodes = nodes.make_simple_nodes()
-        self.prefixes = ''.join(set(self.simple_nodes) | set(self.node_handlers))
+
+    @property
+    def prefixes(self) -> string:
+        return ''.join(set(self.simple_nodes) | set(self.node_handlers))
 
     def parse(self, string: str) -> str:
         try:
