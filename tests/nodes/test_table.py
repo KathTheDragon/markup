@@ -15,6 +15,10 @@ class Test_table_node:
         with raises(table.InvalidData):
             table.table_node('table', data=['foo'])
 
+    def test_headers_data_arg_can_only_have_rows_and_cols():
+        with raises(table.InvalidData):
+            table.table_node('table', data=['headers=foo'])
+
     def test_caption_can_be_added_before_table_body_with_double_slash():
         assert table.table_node('table', text=['foo', '//', 'bar']) == '<table><caption>foo</caption><tr><td>bar</td></tr></table>'
 

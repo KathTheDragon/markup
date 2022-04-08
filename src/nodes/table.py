@@ -9,7 +9,9 @@ def table_node(command: str, attributes: Attributes, data: list[str], text: list
     headers = []
     for attr in data:
         if attr.startswith('headers='):
-            headers = attr.removeprefix('headers=').split(',')
+            headers = set(attr.removeprefix('headers=').split(','))
+            if not (headers <= {'rows', 'cols'}):
+                raise InvalidData()
         else:
             raise InvalidData()
 
@@ -76,7 +78,7 @@ def _merge_up(table: list[list[dict]], row: list[dict]) -> list[list[dict]]:
     return table
 
 
-def _make_tr(row: list[dict], *, headers: list[str], row_num: int) -> str:
+def _make_tr(row: list[dict], *, headers: set[str], row_num: int) -> str:
     cells = []
     for num, cell in enumerate(row):
         cells.extend(_make_td(cell, headers=headers, row_num=row_num, col_num=num))
@@ -86,7 +88,7 @@ def _make_tr(row: list[dict], *, headers: list[str], row_num: int) -> str:
         return ''
 
 
-def _make_td(cell: dict, *, headers: list[str], row_num: int, col_num: int) -> list[str]:
+def _make_td(cell: dict, *, headers: set[str], row_num: int, col_num: int) -> list[str]:
     if cell['data'] is not None:
         tag = 'th' if ('rows' in headers and not row_num or 'cols' in headers and not col_num) else 'td'
         attributes = {}
