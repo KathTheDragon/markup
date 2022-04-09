@@ -15,6 +15,33 @@ class Test_simple_node:
 
 
 @staticmethods
+class Test_describe_node:
+    def test_raises_InvalidData_if_given_data():
+        with raises(nodes.InvalidData):
+            nodes.describe_node('describe', data=['foo'])
+
+    def test_returns_empty_dl_if_no_text_given():
+        assert nodes.describe_node('describe') == '<dl></dl>'
+        assert nodes.describe_node('describe', text=[]) == '<dl></dl>'
+
+    def test_returns_empty_dl_if_only_whitespace_given():
+        assert nodes.describe_node('describe', text=['\n\n']) == '<dl>\n\n</dl>'
+
+    def test_term_and_any_number_of_descriptions_separated_by_pipes():
+        assert nodes.describe_node('describe', text='foo'.split()) == '<dl><dt>foo</dt></dl>'
+        assert nodes.describe_node('describe', text='foo | bar'.split()) == '<dl><dt>foo</dt><dd>bar</dd></dl>'
+        assert nodes.describe_node('describe', text='foo | bar | baz'.split()) == '<dl><dt>foo</dt><dd>bar</dd><dd>baz</dd></dl>'
+
+    def test_terms_separated_by_slashes():
+        assert nodes.describe_node('describe', text='foo / bar / baz'.split()) == '<dl><dt>foo</dt><dt>bar</dt><dt>baz</dt></dl>'
+
+        assert nodes.describe_node('describe', text='foo | bar / baz | bif'.split()) == '<dl><dt>foo</dt><dd>bar</dd><dt>baz</dt><dd>bif</dd></dl>'
+
+    def test_no_tags_added_if_empty_row():
+        assert nodes.describe_node('describe', text='foo / / bar'.split()) == '<dl><dt>foo</dt><dt>bar</dt></dl>'
+
+
+@staticmethods
 class Test_link_node:
     def test_raises_InvalidData_if_not_given_data():
         with raises(nodes.InvalidData):

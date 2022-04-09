@@ -14,6 +14,25 @@ def simple_node(command: str, attributes: Attributes, data: list[str], text: Opt
 
 
 @handler
+def describe_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
+    if data:
+        raise InvalidData()
+
+    content = []
+    for row in partition(text or [], '/'):
+        cells = [strip(cell) for cell in partition(row, '|')]
+        leading, term, trailing = cells.pop(0)
+        if term:
+            content.extend([leading, html('dt', {}, term), trailing])
+        else:
+            content.append(leading)
+        for leading, desc, trailing in cells:
+            content.extend([leading, html('dd', {}, desc), trailing])
+
+    return 'dl', attributes, content
+
+
+@handler
 def link_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     if not data:
         raise InvalidData()
@@ -107,6 +126,7 @@ NodeHandlers = dict[str, dict[str, Handler]]
 def make_node_handlers() -> NodeHandlers:
     return {
         '$': {
+            'describe': describe_node,
             'footnote': footnote_node,
             'link': link_node,
             'list': list_node,
