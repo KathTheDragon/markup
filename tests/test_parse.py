@@ -8,13 +8,13 @@ xfail = pytest.mark.xfail
 from markup.src import html, nodes, parse
 
 @nodes.handler
-def _test_node(command: str, attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes._HandlerReturn:
+def _test_node(attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes._HandlerReturn:
     attributes['data'] = data
     return 'test', attributes, text
 
 
 @nodes.handler
-def error_node(command: str, attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes._HandlerReturn:
+def error_node(attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes._HandlerReturn:
     raise nodes.MarkupError('This always errors')
 
 

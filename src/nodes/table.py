@@ -6,7 +6,7 @@ from ..html import Attributes, html
 from ..utils import partition, strip
 
 @handler
-def table_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
+def table_node(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     headers = []
     for attr in data:
         if attr.startswith('headers='):

@@ -6,15 +6,9 @@ from .table import table_node
 from ..html import Attributes, html
 from ..utils import partition, strip
 
-@handler
-def simple_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
-    if data:
-        raise InvalidData()
-    return command, attributes, text
-
 
 @handler
-def describe_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
+def describe_node(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     if data:
         raise InvalidData()
 
@@ -33,7 +27,7 @@ def describe_node(command: str, attributes: Attributes, data: list[str], text: O
 
 
 @handler
-def link_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
+def link_node(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     if not data:
         raise InvalidData()
     if data[0] == '_blank':
@@ -49,7 +43,7 @@ def link_node(command: str, attributes: Attributes, data: list[str], text: Optio
 
 
 @handler
-def section_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
+def section_node(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     if len(data) != 2:
         raise InvalidData()
     level, title = data
@@ -71,7 +65,7 @@ def section_node(command: str, attributes: Attributes, data: list[str], text: Op
 
 
 @handler
-def footnote_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
+def footnote_node(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     if len(data) != 1:
         raise InvalidData()
     number, = data
@@ -84,7 +78,7 @@ def footnote_node(command: str, attributes: Attributes, data: list[str], text: O
 
 
 @handler
-def list_node(command: str, attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
+def list_node(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
     for attr in data:
         if attr.startswith('start='):
             attributes['start'] = attr.removeprefix('start=')
@@ -113,14 +107,20 @@ def list_node(command: str, attributes: Attributes, data: list[str], text: Optio
     return tag, attributes, text or []
 
 
-SimpleNodes = dict[str, list[str]]
-def make_simple_nodes() -> SimpleNodes:
-    return {
-        '$': [
-            'br', 'blockquote', 'dl', 'dt', 'dd', 'div', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-            'hr', 'p', 'sup', 'sub', 'strong',
-        ],
-    }
+SIMPLE_NODES = [
+    'br', 'blockquote', 'dl', 'dt', 'dd', 'div', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'hr', 'p', 'sup', 'sub', 'strong',
+]
+def _make_simple_node(node: str) -> Handler:
+    @handler
+    def simple_node(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
+        if data:
+            raise InvalidData()
+        return node, attributes, text
+    simple_node.__name__ = node
+    simple_node.__qualname__ = node
+
+    return simple_node
 
 NodeHandlers = dict[str, dict[str, Handler]]
 def make_node_handlers() -> NodeHandlers:
@@ -132,5 +132,7 @@ def make_node_handlers() -> NodeHandlers:
             'list': list_node,
             'section': section_node,
             'table': table_node,
+        } | {
+            node: _make_simple_node(node) for node in SIMPLE_NODES
         }
     }

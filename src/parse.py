@@ -22,11 +22,10 @@ def is_valid_char(char: str, alphabet: str, exclude: str) -> bool:
 class Markup:
     def __init__(self) -> None:
         self.node_handlers = nodes.make_node_handlers()
-        self.simple_nodes = nodes.make_simple_nodes()
 
     @property
     def prefixes(self) -> string:
-        return ''.join(set(self.simple_nodes) | set(self.node_handlers))
+        return ''.join(self.node_handlers)
 
     def parse(self, string: str) -> str:
         try:
@@ -85,12 +84,9 @@ class Markup:
         try:
             handler = self.node_handlers.get(prefix, {}).get(command)
             if handler is None:
-                if command in self.simple_nodes.get(prefix, []):
-                    handler = nodes.simple_node
-                else:
-                    raise nodes.MarkupError(f'Invalid node: {prefix}{command}')
+                raise nodes.MarkupError(f'Invalid node: {prefix}{command}')
 
-            return handler(command, id, classes, data, text), value
+            return handler(id, classes, data, text), value
         except nodes.MarkupError as e:
             return error(e.message), value
         except Exception as e:
