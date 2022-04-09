@@ -42,11 +42,11 @@ class Test_table_node:
     def test_leading_and_trailing_whitespace_moved_outside_cells():
         assert table.table_node('table', text=['\n', 'foo', '\r']) == '<table><tr>\n<td>foo</td>\r</tr></table>'
 
-    def test_first_row_is_heading_cells_if_rows_in_header_data_arg():
-        assert table.table_node('table', data=['headers=rows'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><th>foo</th><th>bar</th></tr><tr><td>baz</td><td>bif</td></tr></table>'
+    def test_first_row_is_heading_cells_if_cols_in_header_data_arg():
+        assert table.table_node('table', data=['headers=cols'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><th>foo</th><th>bar</th></tr><tr><td>baz</td><td>bif</td></tr></table>'
 
-    def test_first_column_is_heading_cells_if_cols_in_header_data_arg():
-        assert table.table_node('table', data=['headers=cols'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><th>foo</th><td>bar</td></tr><tr><th>baz</th><td>bif</td></tr></table>'
+    def test_first_column_is_heading_cells_if_rows_in_header_data_arg():
+        assert table.table_node('table', data=['headers=rows'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><th>foo</th><td>bar</td></tr><tr><th>baz</th><td>bif</td></tr></table>'
 
     def test_first_row_and_column_are_heading_cells_if_rows_and_cols_in_header_data_arg():
         assert table.table_node('table', data=['headers=rows,cols'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><th>foo</th><th>bar</th></tr><tr><th>baz</th><td>bif</td></tr></table>'
