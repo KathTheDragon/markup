@@ -117,8 +117,9 @@ def _make_simple_node(node: str) -> Handler:
         if data:
             raise InvalidData()
         return node, attributes, text
-    simple_node.__name__ = node
-    simple_node.__qualname__ = node
+    name = f'{node}_node'
+    simple_node.__name__ = name
+    simple_node.__qualname__ = name
 
     return simple_node
 
