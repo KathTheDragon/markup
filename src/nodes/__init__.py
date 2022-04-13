@@ -108,7 +108,7 @@ def list_node(attributes: Attributes, data: list[str], text: Optional[list[str]]
 
 
 SIMPLE_NODES = [
-    'br', 'blockquote', 'dl', 'dt', 'dd', 'div', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'br', 'blockquote', 'div', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
     'hr', 'p', 'sup', 'sub', 'strong',
 ]
 def _make_simple_node(node: str) -> Handler:
