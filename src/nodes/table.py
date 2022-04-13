@@ -1,35 +1,36 @@
 from functools import reduce
 from typing import Optional
-from .handler import handler, _HandlerReturn
+from .base import Node, HTML
 from .exceptions import MarkupError, InvalidData
 from ..html import Attributes, html
 from ..utils import partition, strip
 
-@handler
-def table_node(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> _HandlerReturn:
-    headers = []
-    for attr in data:
-        if attr.startswith('headers='):
-            headers = set(attr.removeprefix('headers=').split(','))
-            if not (headers <= {'rows', 'cols'}):
+class TableNode(Node):
+    @staticmethod
+    def process(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> HTML:
+        headers = []
+        for attr in data:
+            if attr.startswith('headers='):
+                headers = set(attr.removeprefix('headers=').split(','))
+                if not (headers <= {'rows', 'cols'}):
+                    raise InvalidData()
+            else:
                 raise InvalidData()
-        else:
-            raise InvalidData()
 
-    text = text or []
-    rows = []
+        text = text or []
+        rows = []
 
-    if '//' in text:
-        caption, text = partition(text, '//')
-        leading, caption, trailing = strip(caption)
-        rows.extend([leading, html('caption', {}, caption), trailing])
+        if '//' in text:
+            caption, text = partition(text, '//')
+            leading, caption, trailing = strip(caption)
+            rows.extend([leading, html('caption', {}, caption), trailing])
 
-    table = [[strip(cell) for cell in partition(row, '|')] for row in partition(text, '/')]
-    if len(set(map(len, table))) != 1:
-        raise MarkupError('Table rows must be the same size')
-    for num, row in enumerate(_merge_table(table)):
-        rows.append(_make_tr(row, headers=headers, row_num=num))
-    return 'table', attributes, rows
+        table = [[strip(cell) for cell in partition(row, '|')] for row in partition(text, '/')]
+        if len(set(map(len, table))) != 1:
+            raise MarkupError('Table rows must be the same size')
+        for num, row in enumerate(_merge_table(table)):
+            rows.append(_make_tr(row, headers=headers, row_num=num))
+        return 'table', attributes, rows
 
 
 def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dict]]:

@@ -8,9 +8,9 @@ xfail = pytest.mark.xfail
 from markup.src import nodes
 
 @staticmethods
-class Test_handler:
+class Test_Node_base:
     def test_puts_id_in_id_attribute():
-        assert nodes._make_simple_node('hr')(id='foo') == '<hr id="foo" />'
+        assert nodes._make_simple_node('hr').make(id='foo') == '<hr id="foo" />'
 
     def test_puts_classes_in_class_attribute():
-        assert nodes._make_simple_node('hr')(classes=['foo', 'bar']) == '<hr class="foo bar" />'
+        assert nodes._make_simple_node('hr').make(classes=['foo', 'bar']) == '<hr class="foo bar" />'

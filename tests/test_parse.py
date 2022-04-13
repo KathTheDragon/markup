@@ -7,20 +7,22 @@ xfail = pytest.mark.xfail
 
 from markup.src import html, nodes, parse
 
-@nodes.handler
-def _test_node(attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes._HandlerReturn:
-    attributes['data'] = data
-    return 'test', attributes, text
+class TestNode(nodes.Node):
+    @staticmethod
+    def process(attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes.HTML:
+        attributes['data'] = data
+        return 'test', attributes, text
 
 
-@nodes.handler
-def error_node(attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes._HandlerReturn:
-    raise nodes.MarkupError('This always errors')
+class ErrorNode(nodes.Node):
+    @staticmethod
+    def process(attributes: html.Attributes, data: list[str], text: list[str] | None) -> nodes.HTML:
+        raise nodes.MarkupError('This always errors')
 
 
 markup = parse.Markup()
-markup.node_handlers['$']['test'] = _test_node
-markup.node_handlers['$']['error'] = error_node
+markup.nodes['$']['test'] = TestNode
+markup.nodes['$']['error'] = ErrorNode
 
 error_msg = '<span class="error">&lt;{}&gt;</span>'
 
