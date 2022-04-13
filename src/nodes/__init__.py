@@ -30,14 +30,12 @@ class DescribeNode(Node):
 class LinkNode(Node):
     @staticmethod
     def process(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> HTML:
-        if not data:
+        if len(data) == 2 and data[0] == '_blank':
+            attributes['target'], attributes['href'] = data
+        elif len(data) == 1:
+            attributes['href'], = data
+        else:
             raise InvalidData()
-        if data[0] == '_blank':
-            attributes['target'] = data.pop(0)
-        if len(data) != 1:
-            raise InvalidData()
-        url, = data
-        attributes['href'] = url
         if text is None:
             text = [url]
 
