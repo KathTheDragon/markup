@@ -9,7 +9,7 @@ class TableNode(Node):
     tag = 'table'
 
     def parse_data(self, data: list[str]) -> Attributes:
-        headers = []
+        headers = set()
         for attr in data:
             if attr.startswith('headers='):
                 headers = set(attr.removeprefix('headers=').split(','))
