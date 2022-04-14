@@ -6,8 +6,9 @@ from ..html import Attributes, html
 from ..utils import partition, strip
 
 class TableNode(Node):
-    @staticmethod
-    def process(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> HTML:
+    tag = 'table'
+
+    def parse_data(self, data: list[str]) -> Attributes:
         headers = []
         for attr in data:
             if attr.startswith('headers='):
@@ -16,8 +17,13 @@ class TableNode(Node):
                     raise InvalidData()
             else:
                 raise InvalidData()
+        return {'headers': headers}
 
-        text = text or []
+    def make_attributes(self) -> Attributes:
+        return self.attributes
+
+    def make_content(self) -> Optional[list[str]]:
+        text = self.text or []
         rows = []
 
         if '//' in text:
@@ -29,8 +35,8 @@ class TableNode(Node):
         if len(set(map(len, table))) != 1:
             raise MarkupError('Table rows must be the same size')
         for num, row in enumerate(_merge_table(table)):
-            rows.append(_make_tr(row, headers=headers, row_num=num))
-        return 'table', attributes, rows
+            rows.append(_make_tr(row, headers=self.headers, row_num=num))
+        return rows
 
 
 def _merge_table(table: list[list[tuple[str, list[str], str]]]) -> list[list[dict]]:

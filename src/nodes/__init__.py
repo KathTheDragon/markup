@@ -1,6 +1,6 @@
 import re
 from typing import Optional
-from .base import Node, HTML
+from .base import Node
 from .exceptions import MarkupError, InvalidData
 from .table import TableNode
 from ..html import Attributes, html
@@ -8,13 +8,11 @@ from ..utils import partition, strip
 
 
 class DescribeNode(Node):
-    @staticmethod
-    def process(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> HTML:
-        if data:
-            raise InvalidData()
+    tag = 'dl'
 
+    def make_content(self) -> Optional[list[str]]:
         content = []
-        for row in partition(text or [], '/'):
+        for row in partition(self.text or [], '/'):
             cells = [strip(cell) for cell in partition(row, '|')]
             leading, term, trailing = cells.pop(0)
             if term:
@@ -23,79 +21,82 @@ class DescribeNode(Node):
                 content.append(leading)
             for leading, desc, trailing in cells:
                 content.extend([leading, html('dd', {}, desc), trailing])
-
-        return 'dl', attributes, content
+        return content
 
 
 class LinkNode(Node):
-    @staticmethod
-    def process(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> HTML:
+    tag = 'a'
+
+    def parse_data(self, data: list[str]) -> Attributes:
+        data_dict = {}
         if len(data) == 2 and data[0] == '_blank':
-            attributes['target'], attributes['href'] = data
+            data_dict['target'], data_dict['href'] = data
         elif len(data) == 1:
-            attributes['href'], = data
+            data_dict['href'], = data
         else:
             raise InvalidData()
-        if text is None:
-            text = [url]
+        return data_dict
 
-        return 'a', attributes, text
+    def make_content(self) -> Optional[list[str]]:
+        return self.text if self.text is not None else [self.data['href']]
 
 
 class SectionNode(Node):
-    @staticmethod
-    def process(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> HTML:
-        if len(data) != 2:
+    tag = 'section'
+
+    def parse_data(self, data: list[str]) -> Attributes:
+        if len(data) != 2 or data[0] not in ('1', '2', '3', '4', '5', '6'):
             raise InvalidData()
-        level, title = data
+        return {'level': data[0], 'title': data[1]}
 
-        if attributes['id'] is None:
-            attributes['id'] = f'sect-{title.lower().replace(" ", "-")}'
+    def make_attributes(self) -> Attributes:
+        id = self.attributes['id'] or f'sect-{self.data["title"].lower().replace(" ", "-")}'
+        return self.attributes | {'id': id}
 
-        if level not in ('1', '2', '3', '4', '5', '6'):
-            raise MarkupError('Invalid level')
+    def make_content(self) -> Optional[list[str]]:
+        level, title = self.data['level'], self.data['title']
         heading = html(f'h{level}', {}, [title])
-        text = text or []
-        if text and text[0].startswith('\n'):
-            indent = re.match(r'\n( *)', text[0]).group(1)
-            text.insert(0, f'\n{indent}{heading}\n')
-        else:
-            text.insert(0, heading)
-
-        return 'section', attributes, text
+        if self.text and self.text[0].startswith('\n'):
+            indent = re.match(r'\n( *)', self.text[0]).group(1)
+            heading = f'\n{indent}{heading}\n'
+        return [heading, *(self.text or [])]
 
 
 class FootnoteNode(Node):
-    @staticmethod
-    def process(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> HTML:
+    tag = 'p'
+
+    def parse_data(self, data: list[str]) -> Attributes:
         if len(data) != 1:
             raise InvalidData()
-        number, = data
-        attributes['class'].append('footnote')
-        prefix = html('sup', {}, [number])
-        text = text or []
-        text.insert(0, prefix)
+        return {'number': data[0]}
 
-        return 'p', attributes, text
+    def make_attributes(self) -> Attributes:
+        return self.attributes | {'class': [*self.attributes['class'], 'footnote']}
+
+    def make_content(self) -> Optional[list[str]]:
+        prefix = html('sup', {}, [self.data['number']])
+        return [prefix, *(self.text or [])]
 
 
 class ListNode(Node):
-    @staticmethod
-    def process(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> HTML:
+    @property
+    def tag(self) -> str:
+        return 'ol' if self.data else 'ul'
+
+    def parse_data(self, data: list[str]) -> Attributes:
+        data_dict = {}
         for attr in data:
             if attr.startswith('start='):
-                attributes['start'] = attr.removeprefix('start=')
+                data_dict['start'] = attr.removeprefix('start=')
             elif attr == 'reversed':
-                attributes['reversed'] = True
+                data_dict['reversed'] = True
             else:
                 raise InvalidData()
+        return data_dict
 
-        if data:
-            tag = 'ol'
-        else:
-            tag = 'ul'
-
+    def make_content(self) -> Optional[list[str]]:
         # Don't make list items if text is empty
+        text = self.text or []
         if text:
             parts = partition(text, '/')
             text = []
@@ -106,8 +107,7 @@ class ListNode(Node):
                 text.append(html('li', {}, part))
                 if trailing:
                     text.append(trailing)
-
-        return tag, attributes, text or []
+        return text
 
 
 SIMPLE_NODES = [
@@ -115,17 +115,7 @@ SIMPLE_NODES = [
     'hr', 'p', 'sup', 'sub', 'strong',
 ]
 def _make_simple_node(node: str) -> Node:
-    class SimpleNode(Node):
-        @staticmethod
-        def process(attributes: Attributes, data: list[str], text: Optional[list[str]]) -> HTML:
-            if data:
-                raise InvalidData()
-            return node, attributes, text
-    name = f'{node.capitalize()}Node'
-    SimpleNode.__name__ = name
-    SimpleNode.__qualname__ = name
-
-    return SimpleNode
+    return type(f'{node.capitalize()}Node', (Node,), {'tag': node})
 
 Nodes = dict[str, dict[str, Node]]
 def make_nodes() -> Nodes:
