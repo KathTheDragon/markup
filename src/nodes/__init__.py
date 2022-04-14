@@ -38,7 +38,7 @@ class LinkNode(Node):
         return data_dict
 
     def make_content(self) -> Optional[list[str]]:
-        return self.text if self.text is not None else [self.data['href']]
+        return self.text or [self.data['href']]
 
 
 class SectionNode(Node):
