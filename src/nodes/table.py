@@ -35,7 +35,7 @@ class TableNode(Node):
         if len(set(map(len, table))) != 1:
             raise MarkupError('Table rows must be the same size')
         for num, row in enumerate(_merge_table(table)):
-            rows.append(_make_tr(row, headers=self.headers, row_num=num))
+            rows.append(_make_tr(row, headers=self.data['headers'], row_num=num))
         return rows
 
 
