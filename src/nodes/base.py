@@ -43,7 +43,7 @@ class Node:
         return data_dict
 
     def make_attributes(self) -> Attributes:
-        return self.attributes | self.data
+        return self.attributes
 
     def make_content(self) -> Optional[list[str]]:
         return self.text

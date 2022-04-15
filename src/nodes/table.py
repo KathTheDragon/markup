@@ -16,9 +16,6 @@ class TableNode(Node):
             raise InvalidData()
         return data_dict
 
-    def make_attributes(self) -> Attributes:
-        return self.attributes
-
     def make_content(self) -> Optional[list[str]]:
         text = self.text or []
         rows = []

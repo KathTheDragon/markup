@@ -26,17 +26,16 @@ class DescribeNode(Node):
 
 class LinkNode(Node):
     tag = 'a'
-    params = ('_blank?', 'href')
+    params = ('_blank?', 'url')
 
-    def parse_data(self, data: list[str]) -> Attributes:
-        data_dict = super().parse_data(data)
-        if '_blank' in data_dict:
-            data_dict.pop('_blank')
-            data_dict['target'] = '_blank'
-        return data_dict
+    def make_attributes(self) -> Attributes:
+        return self.attributes | {
+            'target': '_blank' if data_dict.get('_blank') else None,
+            'href': data_dict['url']
+        }
 
     def make_content(self) -> Optional[list[str]]:
-        return self.text or [self.data['href']]
+        return self.text or [self.data['url']]
 
 
 class SectionNode(Node):
@@ -80,6 +79,9 @@ class ListNode(Node):
         return 'ol' if self.data else 'ul'
 
     params = ('start=', 'reversed?')
+
+    def make_attributes(self) -> Attributes:
+        return self.attributes | self.data
 
     def make_content(self) -> Optional[list[str]]:
         # Don't make list items if text is empty
