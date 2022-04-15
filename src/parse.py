@@ -86,7 +86,7 @@ class Markup:
             if node is None:
                 raise nodes.MarkupError(f'Invalid node: {prefix}{command}')
 
-            return node.make(id, classes, data, text), value
+            return str(node(id, classes, data, text)), value
         except nodes.MarkupError as e:
             return error(e.message), value
         except Exception as e:
