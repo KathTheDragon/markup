@@ -26,15 +26,13 @@ class DescribeNode(Node):
 
 class LinkNode(Node):
     tag = 'a'
+    params = ('_blank?', 'href')
 
     def parse_data(self, data: list[str]) -> Attributes:
-        data_dict = {}
-        if len(data) == 2 and data[0] == '_blank':
-            data_dict['target'], data_dict['href'] = data
-        elif len(data) == 1:
-            data_dict['href'], = data
-        else:
-            raise InvalidData()
+        data_dict = super().parse_data(data)
+        if '_blank' in data_dict:
+            data_dict.pop('_blank')
+            data_dict['target'] = '_blank'
         return data_dict
 
     def make_content(self) -> Optional[list[str]]:
@@ -43,11 +41,13 @@ class LinkNode(Node):
 
 class SectionNode(Node):
     tag = 'section'
+    params = ('level', 'title')
 
     def parse_data(self, data: list[str]) -> Attributes:
-        if len(data) != 2 or data[0] not in ('1', '2', '3', '4', '5', '6'):
+        data_dict = super().parse_data(data)
+        if data_dict['level'] not in ('1', '2', '3', '4', '5', '6'):
             raise InvalidData()
-        return {'level': data[0], 'title': data[1]}
+        return data_dict
 
     def make_attributes(self) -> Attributes:
         id = self.attributes['id'] or f'sect-{self.data["title"].lower().replace(" ", "-")}'
@@ -64,11 +64,7 @@ class SectionNode(Node):
 
 class FootnoteNode(Node):
     tag = 'p'
-
-    def parse_data(self, data: list[str]) -> Attributes:
-        if len(data) != 1:
-            raise InvalidData()
-        return {'number': data[0]}
+    params = ('number',)
 
     def make_attributes(self) -> Attributes:
         return self.attributes | {'class': [*self.attributes['class'], 'footnote']}
@@ -83,16 +79,7 @@ class ListNode(Node):
     def tag(self) -> str:
         return 'ol' if self.data else 'ul'
 
-    def parse_data(self, data: list[str]) -> Attributes:
-        data_dict = {}
-        for attr in data:
-            if attr.startswith('start='):
-                data_dict['start'] = attr.removeprefix('start=')
-            elif attr == 'reversed':
-                data_dict['reversed'] = True
-            else:
-                raise InvalidData()
-        return data_dict
+    params = ('start=', 'reversed?')
 
     def make_content(self) -> Optional[list[str]]:
         # Don't make list items if text is empty

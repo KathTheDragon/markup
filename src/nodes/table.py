@@ -7,17 +7,14 @@ from ..utils import partition, strip
 
 class TableNode(Node):
     tag = 'table'
+    params = ('headers=',)
 
     def parse_data(self, data: list[str]) -> Attributes:
-        headers = set()
-        for attr in data:
-            if attr.startswith('headers='):
-                headers = set(attr.removeprefix('headers=').split(','))
-                if not (headers <= {'rows', 'cols'}):
-                    raise InvalidData()
-            else:
-                raise InvalidData()
-        return {'headers': headers}
+        data_dict = super().parse_data(data)
+        data_dict['headers'] = data_dict.get('headers', '').split(',')
+        if not (set(data_dict['headers']) <= {'rows', 'cols'}):
+            raise InvalidData()
+        return data_dict
 
     def make_attributes(self) -> Attributes:
         return self.attributes
@@ -35,7 +32,7 @@ class TableNode(Node):
         if len(set(map(len, table))) != 1:
             raise MarkupError('Table rows must be the same size')
         for num, row in enumerate(_merge_table(table)):
-            rows.append(_make_tr(row, headers=self.data['headers'], row_num=num))
+            rows.append(_make_tr(row, headers=set(self.data['headers']), row_num=num))
         return rows
 
 
