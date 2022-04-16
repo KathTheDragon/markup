@@ -30,8 +30,8 @@ class LinkNode(Node):
 
     def make_attributes(self) -> Attributes:
         return self.attributes | {
-            'target': '_blank' if data_dict.get('_blank') else None,
-            'href': data_dict['url']
+            'target': '_blank' if self.data.get('_blank') else None,
+            'href': self.data['url']
         }
 
     def make_content(self) -> Optional[list[str]]:
