@@ -25,7 +25,7 @@ class Node:
 
 
 def parse_data(data: list[str], params: tuple[str, ...]) -> Attributes:
-    positionals = reversed(param for param in params if not param.endswith('?') and not param.endswith('='))
+    positionals = [param for param in reversed(params) if not param.endswith('?') and not param.endswith('=')]
     boolean = {param.removesuffix('?') for param in params if param.endswith('?')}
     named = {param.removesuffix('=') for param in params if param.endswith('=')}
     data_dict = {}
