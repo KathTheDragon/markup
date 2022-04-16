@@ -9,134 +9,87 @@ from markup.src import nodes
 
 @staticmethods
 class Test_SimpleNode:
-    def test_raises_InvalidData_if_given_data():
-        with raises(nodes.InvalidData):
-            nodes._make_simple_node('hr').make(data=['foo'])
+    pass
 
 
 @staticmethods
 class Test_DescribeNode:
-    def test_raises_InvalidData_if_given_data():
-        with raises(nodes.InvalidData):
-            nodes.DescribeNode.make(data=['foo'])
+    def test_empty_content_if_no_text_given():
+        assert nodes.DescribeNode().make_content() == ['']
+        assert nodes.DescribeNode(text=[]).make_content() == ['']
 
-    def test_returns_empty_dl_if_no_text_given():
-        assert nodes.DescribeNode.make() == '<dl></dl>'
-        assert nodes.DescribeNode.make(text=[]) == '<dl></dl>'
-
-    def test_returns_empty_dl_if_only_whitespace_given():
-        assert nodes.DescribeNode.make(text=['\n\n']) == '<dl>\n\n</dl>'
+    def test_content_with_only_whitespace_if_only_whitespace_given_in_text():
+        assert nodes.DescribeNode(text=['\n\n']).make_content() == ['\n\n']
 
     def test_term_and_any_number_of_descriptions_separated_by_pipes():
-        assert nodes.DescribeNode.make(text='foo'.split()) == '<dl><dt>foo</dt></dl>'
-        assert nodes.DescribeNode.make(text='foo | bar'.split()) == '<dl><dt>foo</dt><dd>bar</dd></dl>'
-        assert nodes.DescribeNode.make(text='foo | bar | baz'.split()) == '<dl><dt>foo</dt><dd>bar</dd><dd>baz</dd></dl>'
+        assert nodes.DescribeNode(text='foo'.split()).make_content() == ['', '<dt>foo</dt>', '']
+        assert nodes.DescribeNode(text='foo | bar'.split()).make_content() == ['', '<dt>foo</dt>', '', '', '<dd>bar</dd>', '']
+        assert nodes.DescribeNode(text='foo | bar | baz'.split()).make_content() == ['', '<dt>foo</dt>', '', '', '<dd>bar</dd>', '', '', '<dd>baz</dd>', '']
 
     def test_terms_separated_by_slashes():
-        assert nodes.DescribeNode.make(text='foo / bar / baz'.split()) == '<dl><dt>foo</dt><dt>bar</dt><dt>baz</dt></dl>'
+        assert nodes.DescribeNode(text='foo / bar / baz'.split()).make_content() == ['', '<dt>foo</dt>', '', '', '<dt>bar</dt>', '', '', '<dt>baz</dt>', '']
 
-        assert nodes.DescribeNode.make(text='foo | bar / baz | bif'.split()) == '<dl><dt>foo</dt><dd>bar</dd><dt>baz</dt><dd>bif</dd></dl>'
+        assert nodes.DescribeNode(text='foo | bar / baz | bif'.split()).make_content() == ['', '<dt>foo</dt>', '', '', '<dd>bar</dd>', '', '', '<dt>baz</dt>', '', '', '<dd>bif</dd>', '']
 
     def test_no_tags_added_if_empty_row():
-        assert nodes.DescribeNode.make(text='foo / / bar'.split()) == '<dl><dt>foo</dt><dt>bar</dt></dl>'
+        assert nodes.DescribeNode(text='foo / / bar'.split()).make_content() == ['', '<dt>foo</dt>', '', '', '', '<dt>bar</dt>', '']
 
 
 @staticmethods
 class Test_LinkNode:
-    def test_raises_InvalidData_if_not_given_data():
-        with raises(nodes.InvalidData):
-            nodes.LinkNode.make()
-
-    def test_raises_InvalidData_if_given_blank_but_not_url():
-        with raises(nodes.InvalidData):
-            nodes.LinkNode.make(data=['_blank'])
-
-    def test_raises_InvalidData_if_given_additional_data_arguments():
-        with raises(nodes.InvalidData):
-            nodes.LinkNode.make(data=['_blank', 'foo.bar', 'baz'])
-
     def test_url_is_put_in_href_attribute():
-        assert nodes.LinkNode.make(data=['foo.bar'], text=['foo']) == '<a href="foo.bar">foo</a>'
+        assert nodes.LinkNode(data=['foo.bar']).make_attributes() == {'id': None, 'class': [], 'target': None, 'href': 'foo.bar'}
 
     def test_if_blank_data_arg_is_given_is_put_in_target_attribute():
-        assert nodes.LinkNode.make(data=['_blank', 'foo.bar'], text=['foo']) == '<a target="_blank" href="foo.bar">foo</a>'
+        assert nodes.LinkNode(data=['_blank', 'foo.bar']).make_attributes() == {'id': None, 'class': [], 'target': '_blank', 'href': 'foo.bar'}
 
-    def test_if_text_is_none_is_set_to_list_containing_url():
-        assert nodes.LinkNode.make(data=['foo.bar']) == '<a href="foo.bar">foo.bar</a>'
+    def test_if_text_is_none_content_is_list_containing_url():
+        assert nodes.LinkNode(data=['foo.bar']).make_content() == ['foo.bar']
 
 
 @staticmethods
 class Test_SectionNode:
-    def test_raises_InvalidData_if_not_given_level_and_title_data_args():
-        with raises(nodes.InvalidData):
-            nodes.SectionNode.make()
-
-        with raises(nodes.InvalidData):
-            nodes.SectionNode.make(data=['2'])
-
-    def test_raises_InvalidData_if_given_additional_data_args():
-        with raises(nodes.InvalidData):
-            nodes.SectionNode.make(data=['2', 'Foo', 'Bar'])
-
     def test_id_formed_from_title_if_not_given():
-        assert nodes.SectionNode.make(data=['2', 'Foo']) == '<section id="sect-foo"><h2>Foo</h2></section>'
-        assert nodes.SectionNode.make(id='bar', data=['2', 'Foo']) == '<section id="bar"><h2>Foo</h2></section>'
+        assert nodes.SectionNode(data=['2', 'Foo']).make_attributes() == {'id': 'sect-foo', 'class': []}
+        assert nodes.SectionNode(id='bar', data=['2', 'Foo']).make_attributes() == {'id': 'bar', 'class': []}
 
     def test_level_must_be_digit_1_to_6():
         with raises(nodes.MarkupError):
-            nodes.SectionNode.make(data=['Foo', 'Bar'])
+            nodes.SectionNode(data=['Foo', 'Bar'])
 
     def test_if_first_line_of_text_is_blank_indent_of_second_line_applied_to_heading():
-        assert nodes.SectionNode.make(data=['2', 'Foo'], text=['\n   ', 'Bar']) == '<section id="sect-foo">\n   <h2>Foo</h2>\n\n   Bar</section>'
+        assert nodes.SectionNode(data=['2', 'Foo'], text=['\n   ', 'Bar']).make_content() == ['\n   <h2>Foo</h2>\n', '\n   ', 'Bar']
 
 
 @staticmethods
 class Test_FootnoteNode:
-    def test_raises_InvalidData_if_not_given_number_data_arg():
-        with raises(nodes.InvalidData):
-            nodes.FootnoteNode.make()
-
-    def test_raises_InvalidData_if_given_additional_data_args():
-        with raises(nodes.InvalidData):
-            nodes.FootnoteNode.make(data=['1', 'Foo'])
-
     def test_footnote_added_to_classes():
-        assert nodes.FootnoteNode.make(classes=['foo'], data=['1']) == '<p class="foo footnote"><sup>1</sup></p>'
+        assert nodes.FootnoteNode(classes=['foo'], data=['1']).make_attributes() == {'id': None, 'class': ['foo', 'footnote']}
 
     def test_sup_tag_inserted_at_start_of_content():
-        assert nodes.FootnoteNode.make(data=['1'], text=['Foo']) == '<p class="footnote"><sup>1</sup>Foo</p>'
+        assert nodes.FootnoteNode(data=['1'], text=['Foo']).make_content() == ['<sup>1</sup>', 'Foo']
 
 
 @staticmethods
 class Test_ListNode:
-    def test_start_data_arg_mapped_to_start_attribute():
-        assert nodes.ListNode.make(data=['start=3']) == '<ol start="3"></ol>'
-
-    def test_reversed_data_arg_mapped_to_reversed_attribute():
-        assert nodes.ListNode.make(data=['reversed']) == '<ol reversed></ol>'
-
-    def test_raises_InvalidData_if_any_other_data_arg_given():
-        with raises(nodes.InvalidData):
-            nodes.ListNode.make(data=['foo'])
-
     def test_tag_is_ol_only_if_data_given():
-        assert nodes.ListNode.make() == '<ul></ul>'
-        assert nodes.ListNode.make(data=['start=6', 'reversed']) == '<ol start="6" reversed></ol>'
-        assert nodes.ListNode.make(id='foo', classes=['bar']) == '<ul id="foo" class="bar"></ul>'
+        assert nodes.ListNode().tag == 'ul'
+        assert nodes.ListNode(data=['start=6', 'reversed']).tag == 'ol'
+        assert nodes.ListNode(id='foo', classes=['bar']).tag == 'ul'
 
     def test_adds_no_list_items_if_empty_text():
-        assert nodes.ListNode.make() == '<ul></ul>'
+        assert nodes.ListNode().make_content() == []
 
     def test_adds_one_list_item_if_no_isolated_slash_in_text():
-        assert nodes.ListNode.make(text=['foo/bar']) == '<ul><li>foo/bar</li></ul>'
-        assert nodes.ListNode.make(text=['foo / bar']) == '<ul><li>foo / bar</li></ul>'
-        assert nodes.ListNode.make(text=['foo', '/', 'bar']) == '<ul><li>foo</li><li>bar</li></ul>'
+        assert nodes.ListNode(text=['foo/bar']).make_content() == ['<li>foo/bar</li>']
+        assert nodes.ListNode(text=['foo / bar']).make_content() == ['<li>foo / bar</li>']
+        assert nodes.ListNode(text=['foo', '/', 'bar']).make_content() == ['<li>foo</li>', '<li>bar</li>']
 
     def test_slash_separates_list_items():
-        assert nodes.ListNode.make(text=['foo', '/', 'bar', '/', 'baz', '/', 'bif']) == '<ul><li>foo</li><li>bar</li><li>baz</li><li>bif</li></ul>'
+        assert nodes.ListNode(text=['foo', '/', 'bar', '/', 'baz', '/', 'bif']).make_content() == ['<li>foo</li>', '<li>bar</li>', '<li>baz</li>', '<li>bif</li>']
 
     def test_leading_and_trailing_whitespace_trimmed():
-        assert nodes.ListNode.make(text=[' foo ', '/', ' ', 'bar', ' ']) == '<ul><li> foo </li><li>bar</li></ul>'
+        assert nodes.ListNode(text=[' foo ', '/', ' ', 'bar', ' ']).make_content() == ['<li> foo </li>', '<li>bar</li>']
 
     def test_leading_and_trailing_whitespace_moved_outside_list_items():
-        assert nodes.ListNode.make(text=['\nfoo\n', '/', '\n', 'bar', '\n']) == '<ul><li>\nfoo\n</li>\n<li>bar</li>\n</ul>'
+        assert nodes.ListNode(text=['\nfoo\n', '/', '\n', 'bar', '\n']).make_content() == ['<li>\nfoo\n</li>', '\n', '<li>bar</li>', '\n']

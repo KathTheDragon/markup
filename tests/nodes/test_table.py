@@ -9,47 +9,41 @@ from markup.src.nodes import table
 
 @staticmethods
 class Test_TableNode:
-    @xfail(reason='Empty tables are not yet handled')
-    def test_only_accepts_headers_data_arg():
-        assert table.TableNode.make(data=['headers=rows']) == '<table></table>'
-        with raises(table.InvalidData):
-            table.TableNode.make(data=['foo'])
-
     def test_headers_data_arg_can_only_have_rows_and_cols():
         with raises(table.InvalidData):
-            table.TableNode.make(data=['headers=foo'])
+            table.TableNode(data=['headers=foo'])
 
     def test_caption_can_be_added_before_table_body_with_double_slash():
-        assert table.TableNode.make(text=['foo', '//', 'bar']) == '<table><caption>foo</caption><tr><td>bar</td></tr></table>'
+        assert table.TableNode(text=['foo', '//', 'bar']).make_content() == ['', '<caption>foo</caption>', '', '<tr><td>bar</td></tr>']
 
     def test_leading_and_trailing_whitespace_around_caption_placed_outside_tag():
-        assert table.TableNode.make(text=['  \n  ', 'foo', '\t\r\t', '//', 'bar']) == '<table>\n  <caption>foo</caption>\r\t<tr><td>bar</td></tr></table>'
+        assert table.TableNode(text=['  \n  ', 'foo', '\t\r\t', '//', 'bar']).make_content() == ['\n  ', '<caption>foo</caption>', '\r\t', '<tr><td>bar</td></tr>']
 
     def test_table_rows_separated_by_single_slash():
-        assert table.TableNode.make(text=['foo', '/', 'bar', '/', 'baz']) == '<table><tr><td>foo</td></tr><tr><td>bar</td></tr><tr><td>baz</td></tr></table>'
+        assert table.TableNode(text=['foo', '/', 'bar', '/', 'baz']).make_content() == ['<tr><td>foo</td></tr>', '<tr><td>bar</td></tr>', '<tr><td>baz</td></tr>']
 
     def test_table_cells_separated_by_pipe():
-        assert table.TableNode.make(text=['foo', '|', 'bar', '|', 'baz']) == '<table><tr><td>foo</td><td>bar</td><td>baz</td></tr></table>'
+        assert table.TableNode(text=['foo', '|', 'bar', '|', 'baz']).make_content() == ['<tr><td>foo</td><td>bar</td><td>baz</td></tr>']
 
     def test_rows_must_all_contain_the_same_number_of_cells():
-        assert table.TableNode.make(text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><td>foo</td><td>bar</td></tr><tr><td>baz</td><td>bif</td></tr></table>'
+        assert table.TableNode(text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']).make_content() == ['<tr><td>foo</td><td>bar</td></tr>', '<tr><td>baz</td><td>bif</td></tr>']
         with raises(table.MarkupError):
-            table.TableNode.make(text=['foo', '|', 'bar', '/', 'baz'])
+            table.TableNode(text=['foo', '|', 'bar', '/', 'baz']).make_content()
 
     def test_leading_and_trailing_whitespace_trimmed():
-        assert table.TableNode.make(text=['  ', 'foo', '   ']) == '<table><tr><td>foo</td></tr></table>'
+        assert table.TableNode(text=['  ', 'foo', '   ']).make_content() == ['<tr><td>foo</td></tr>']
 
     def test_leading_and_trailing_whitespace_moved_outside_cells():
-        assert table.TableNode.make(text=['\n', 'foo', '\r']) == '<table><tr>\n<td>foo</td>\r</tr></table>'
+        assert table.TableNode(text=['\n', 'foo', '\r']).make_content() == ['<tr>\n<td>foo</td>\r</tr>']
 
     def test_first_row_is_heading_cells_if_cols_in_header_data_arg():
-        assert table.TableNode.make(data=['headers=cols'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><th>foo</th><th>bar</th></tr><tr><td>baz</td><td>bif</td></tr></table>'
+        assert table.TableNode(data=['headers=cols'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']).make_content() == ['<tr><th>foo</th><th>bar</th></tr>', '<tr><td>baz</td><td>bif</td></tr>']
 
     def test_first_column_is_heading_cells_if_rows_in_header_data_arg():
-        assert table.TableNode.make(data=['headers=rows'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><th>foo</th><td>bar</td></tr><tr><th>baz</th><td>bif</td></tr></table>'
+        assert table.TableNode(data=['headers=rows'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']).make_content() == ['<tr><th>foo</th><td>bar</td></tr>', '<tr><th>baz</th><td>bif</td></tr>']
 
     def test_first_row_and_column_are_heading_cells_if_rows_and_cols_in_header_data_arg():
-        assert table.TableNode.make(data=['headers=rows,cols'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']) == '<table><tr><th>foo</th><th>bar</th></tr><tr><th>baz</th><td>bif</td></tr></table>'
+        assert table.TableNode(data=['headers=rows,cols'], text=['foo', '|', 'bar', '/', 'baz', '|', 'bif']).make_content() == ['<tr><th>foo</th><th>bar</th></tr>', '<tr><th>baz</th><td>bif</td></tr>']
 
 
 @staticmethods
