@@ -1,6 +1,6 @@
 from functools import reduce
 from typing import Optional
-from .base import Node, HTML
+from .base import Node
 from .exceptions import MarkupError, InvalidData
 from ..html import Attributes, html
 from ..utils import partition, strip
