@@ -11,7 +11,7 @@ class TableNode(Node):
 
     def parse_data(self, data: list[str]) -> Attributes:
         data_dict = super().parse_data(data)
-        data_dict['headers'] = data_dict.get('headers', '').split(',')
+        data_dict['headers'] = list(filter(None, data_dict.get('headers', '').split(',')))
         if not (set(data_dict['headers']) <= {'rows', 'cols'}):
             raise InvalidData()
         return data_dict
