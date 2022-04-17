@@ -16,7 +16,7 @@ class TestNode(nodes.Node):
 
 
 class ErrorNode(nodes.Node):
-    def parse_data(self, data: list[str]) -> html.Attributes:
+    def make_data(self, data: html.Attributes) -> html.Attributes:
         raise nodes.MarkupError('This always errors')
 
 

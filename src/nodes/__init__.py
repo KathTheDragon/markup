@@ -41,11 +41,10 @@ class SectionNode(Node):
     tag = 'section'
     params = ('level', 'title')
 
-    def parse_data(self, data: list[str]) -> Attributes:
-        data_dict = super().parse_data(data)
-        if data_dict['level'] not in ('1', '2', '3', '4', '5', '6'):
+    def make_data(self, data: Attributes) -> Attributes:
+        if data['level'] not in ('1', '2', '3', '4', '5', '6'):
             raise InvalidData('level must be a digit 1-6')
-        return data_dict
+        return data
 
     def make_attributes(self) -> Attributes:
         id = self.attributes['id'] or f'sect-{self.data["title"].lower().replace(" ", "-")}'

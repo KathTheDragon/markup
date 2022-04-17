@@ -8,12 +8,11 @@ class TableNode(Node):
     tag = 'table'
     params = ('headers=',)
 
-    def parse_data(self, data: list[str]) -> Attributes:
-        data_dict = super().parse_data(data)
-        data_dict['headers'] = list(filter(None, data_dict.get('headers', '').split(',')))
-        if not (set(data_dict['headers']) <= {'rows', 'cols'}):
+    def make_data(self, data: Attributes) -> Attributes:
+        data['headers'] = list(filter(None, data.get('headers', '').split(',')))
+        if not (set(data['headers']) <= {'rows', 'cols'}):
             raise InvalidData('headers can only contain \'rows\' and \'cols\'')
-        return data_dict
+        return data
 
     def make_content(self) -> Optional[list[str]]:
         text = self.text or []

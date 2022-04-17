@@ -22,14 +22,14 @@ class Node:
 
     def __init__(self, id: Optional[str]=None, classes: list[str]=None, data: list[str]=None, text: Optional[list[str]]=None) -> None:
         self.attributes = {'id': id, 'class': classes or []}
-        self.data = self.parse_data(data or [])
+        self.data = self.make_data(parse_data(data or [], self.params))
         self.text = text
 
     def __str__(self) -> str:
         return html(self.tag, self.make_attributes(), self.make_content())
 
-    def parse_data(self, data: list[str]) -> Attributes:
-        return parse_data(data, self.params)
+    def make_data(self, data: Attributes) -> Attributes:
+        return data
 
     def make_attributes(self) -> Attributes:
         return self.attributes
