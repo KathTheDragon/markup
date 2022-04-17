@@ -1,6 +1,20 @@
 from typing import Optional
-from .exceptions import InvalidData
 from ..html import Attributes, html
+
+class MarkupError(Exception):
+    prefix = ''
+
+    def __init__(self, message: str) -> None:
+        self.message = message
+        if self.prefix:
+            super().__init__(f'{self.prefix}: {message}')
+        else:
+            super().__init__(message)
+
+
+class InvalidData(MarkupError):
+    prefix = 'Invalid data'
+
 
 class Node:
     tag: str
@@ -37,7 +51,7 @@ def parse_data(data: list[str], params: tuple[str, ...]) -> Attributes:
                 named.remove(name)
                 data_dict[name] = value
             else:
-                raise InvalidData()
+                raise InvalidData(f'unknown named argument {name!r}')
         # Test for boolean argument
         elif arg in boolean:
             boolean.remove(arg)
@@ -47,7 +61,7 @@ def parse_data(data: list[str], params: tuple[str, ...]) -> Attributes:
             name = positionals.pop()
             data_dict[name] = arg
         else:
-            raise InvalidData()
+            raise InvalidData(f'additional positional argument {arg!r}')
     if positionals:
-        raise InvalidData()
+        raise InvalidData(f'missing required arguments {"".join(list(map(repr, positionals)))}')
     return data_dict

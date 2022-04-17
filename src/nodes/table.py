@@ -1,7 +1,6 @@
 from functools import reduce
 from typing import Optional
-from .base import Node
-from .exceptions import MarkupError, InvalidData
+from .base import MarkupError, InvalidData, Node
 from ..html import Attributes, html
 from ..utils import partition, strip
 
@@ -13,7 +12,7 @@ class TableNode(Node):
         data_dict = super().parse_data(data)
         data_dict['headers'] = list(filter(None, data_dict.get('headers', '').split(',')))
         if not (set(data_dict['headers']) <= {'rows', 'cols'}):
-            raise InvalidData()
+            raise InvalidData('headers can only contain \'rows\' and \'cols\'')
         return data_dict
 
     def make_content(self) -> Optional[list[str]]:

@@ -1,7 +1,6 @@
 import re
 from typing import Optional
-from .base import Node
-from .exceptions import MarkupError, InvalidData
+from .base import InvalidData, Node
 from .table import TableNode
 from ..html import Attributes, html
 from ..utils import partition, strip
@@ -45,7 +44,7 @@ class SectionNode(Node):
     def parse_data(self, data: list[str]) -> Attributes:
         data_dict = super().parse_data(data)
         if data_dict['level'] not in ('1', '2', '3', '4', '5', '6'):
-            raise InvalidData()
+            raise InvalidData('level must be a digit 1-6')
         return data_dict
 
     def make_attributes(self) -> Attributes:
