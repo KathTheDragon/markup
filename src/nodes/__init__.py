@@ -1,6 +1,6 @@
 import re
 from typing import Optional
-from .base import InvalidData, Node
+from .base import MarkupError, InvalidData, Node
 from .table import TableNode
 from ..html import Attributes, html
 from ..utils import partition, strip
