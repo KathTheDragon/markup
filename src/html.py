@@ -23,5 +23,5 @@ def format_attributes(attributes: Attributes) -> str:
         elif isinstance(value, str):
             attrs.append(f'{attribute}="{value}"')
         elif isinstance(value, list):
-            attrs.append(f'{attribute}="{" ".join(value)}"')
+            attrs.append(f'{attribute}="{" ".join(list(filter(None, value)))}"')
     return ' '.join(attrs)
