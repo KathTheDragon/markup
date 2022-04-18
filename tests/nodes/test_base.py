@@ -33,6 +33,11 @@ class Test_parse_data:
         params = {'foo=': None, 'baz=': None}
         assert base.parse_data(data, params) == {'foo': 'bar', 'baz': 'bif'}
 
+    # Star parameter
+    def test_star_param_allows_arbitrary_named_arguments():
+        params = {'*=': None}
+        data = ['foo=bar', 'baz=bif', 'oof=rab', 'zab=fib']
+        assert base.parse_data(data, params) == {'foo': 'bar', 'baz': 'bif', 'oof': 'rab', 'zab': 'fib'}
 
     # Boolean arguments
     def test_params_ending_with_question_mark_match_parameter_name():
@@ -62,6 +67,11 @@ class Test_parse_data:
         params = {'foo=': None, 'baz=': None}
         with raises(base.InvalidData):
             base.parse_data(data, params)
+
+    def test_star_param_not_an_error_if_matches_no_arguments():
+        params = {'*=': None}
+        data = []
+        assert base.parse_data(data, params) == {}
 
     def test_unused_boolean_parameters_with_default_values_are_given_default_value():
         data = ['foo']

@@ -47,8 +47,8 @@ def parse_data(data: list[str], params: Attributes) -> Attributes:
         # Test for named argument
         if '=' in arg:
             name, value = arg.split('=', maxsplit=1)
-            if name in named:
-                named.pop(name)
+            if name in named or '*' in named:
+                named.pop(name, None)
                 data_dict[name] = value
             else:
                 raise InvalidData(f'unknown named argument {name!r}')
@@ -62,6 +62,7 @@ def parse_data(data: list[str], params: Attributes) -> Attributes:
             data_dict[name] = arg
         else:
             raise InvalidData(f'additional positional argument {arg!r}')
+    named.pop('*', None)
     missing = []
     for name, default in (positionals | boolean | named).items():
         if default is None:
