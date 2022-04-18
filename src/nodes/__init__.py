@@ -59,18 +59,6 @@ class SectionNode(Node):
         return [heading, *(self.text or [])]
 
 
-class FootnoteNode(Node):
-    tag = 'p'
-    params = ('number',)
-
-    def make_attributes(self) -> Attributes:
-        return self.attributes | {'class': [*self.attributes['class'], 'footnote']}
-
-    def make_content(self) -> Optional[list[str]]:
-        prefix = html('sup', {}, [self.data['number']])
-        return [prefix, *(self.text or [])]
-
-
 class ListNode(Node):
     @property
     def tag(self) -> str:
@@ -109,7 +97,6 @@ def make_nodes() -> Nodes:
     return {
         '$': {
             'describe': DescribeNode,
-            'footnote': FootnoteNode,
             'link': LinkNode,
             'list': ListNode,
             'section': SectionNode,

@@ -62,15 +62,6 @@ class Test_SectionNode:
 
 
 @staticmethods
-class Test_FootnoteNode:
-    def test_footnote_added_to_classes():
-        assert nodes.FootnoteNode(classes=['foo'], data=['1']).make_attributes() == {'id': None, 'class': ['foo', 'footnote']}
-
-    def test_sup_tag_inserted_at_start_of_content():
-        assert nodes.FootnoteNode(data=['1'], text=['Foo']).make_content() == ['<sup>1</sup>', 'Foo']
-
-
-@staticmethods
 class Test_ListNode:
     def test_tag_is_ol_only_if_data_given():
         assert nodes.ListNode().tag == 'ul'
