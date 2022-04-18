@@ -33,22 +33,6 @@ class Test_parse_data:
         params = {'foo=': None, 'baz=': None}
         assert base.parse_data(data, params) == {'foo': 'bar', 'baz': 'bif'}
 
-    def test_unused_named_parameters_with_default_values_are_given_default_value():
-        data = ['foo=bar']
-        params = {'foo=': None, 'baz=': 'bif'}
-        assert base.parse_data(data, params) == {'foo': 'bar', 'baz': 'bif'}
-
-    def test_unused_named_parameters_without_default_values_are_an_error():
-        data = ['foo=bar']
-        params = {'foo=': None, 'baz=': None}
-        with raises(base.InvalidData):
-            base.parse_data(data, params)
-
-    def test_unknown_named_parameters_are_an_error():
-        data = ['bar=foo']
-        params = {'foo=': None, 'baz=': None}
-        with raises(base.InvalidData):
-            base.parse_data(data, params)
 
     # Boolean arguments
     def test_params_ending_with_question_mark_match_parameter_name():
@@ -61,6 +45,24 @@ class Test_parse_data:
         params = {'foo?': None, 'bar?': None}
         assert base.parse_data(data, params) == {'foo': True, 'bar': True}
 
+    # Positional arguments
+    def test_all_other_params_match_next_unmatched_argument():
+        params = {'foo': None, 'bar?': None, 'baz=': None, 'bif': None}
+        data = ['baz=oof', 'bar', 'rab', 'zab']
+        assert base.parse_data(data, params) == {'foo': 'rab', 'bar': True, 'baz': 'oof', 'bif': 'zab'}
+
+    # Unused parameters
+    def test_unused_named_parameters_with_default_values_are_given_default_value():
+        data = ['foo=bar']
+        params = {'foo=': None, 'baz=': 'bif'}
+        assert base.parse_data(data, params) == {'foo': 'bar', 'baz': 'bif'}
+
+    def test_unused_named_parameters_without_default_values_are_an_error():
+        data = ['foo=bar']
+        params = {'foo=': None, 'baz=': None}
+        with raises(base.InvalidData):
+            base.parse_data(data, params)
+
     def test_unused_boolean_parameters_with_default_values_are_given_default_value():
         data = ['foo']
         params = {'foo?': None, 'bar?': False}
@@ -72,18 +74,6 @@ class Test_parse_data:
         with raises(base.InvalidData):
             base.parse_data(data, params)
 
-    # Positional arguments
-    def test_all_other_params_match_next_unmatched_argument():
-        params = {'foo': None, 'bar?': None, 'baz=': None, 'bif': None}
-        data = ['baz=oof', 'bar', 'rab', 'zab']
-        assert base.parse_data(data, params) == {'foo': 'rab', 'bar': True, 'baz': 'oof', 'bif': 'zab'}
-
-    def test_arguments_that_cannot_be_matched_are_an_error():
-        params = {'foo': None, 'bar': None}
-        data = ['baz', 'bif', 'oof']
-        with raises(base.InvalidData):
-            base.parse_data(data, params)
-
     def test_unmatched_positional_parameters_with_default_values_are_given_default_value():
         params = {'foo': None, 'bar': 'bif'}
         data = ['baz']
@@ -92,5 +82,18 @@ class Test_parse_data:
     def test_unmatched_positional_parameters_without_default_values_are_an_error():
         params = {'foo': None, 'bar': None}
         data = ['baz']
+        with raises(base.InvalidData):
+            base.parse_data(data, params)
+
+    # Unknown parameters
+    def test_unknown_named_parameters_are_an_error():
+        data = ['bar=foo']
+        params = {'foo=': None, 'baz=': None}
+        with raises(base.InvalidData):
+            base.parse_data(data, params)
+
+    def test_arguments_that_cannot_be_matched_are_an_error():
+        params = {'foo': None, 'bar': None}
+        data = ['baz', 'bif', 'oof']
         with raises(base.InvalidData):
             base.parse_data(data, params)
