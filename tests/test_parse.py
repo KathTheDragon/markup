@@ -9,7 +9,7 @@ from markup.src import html, nodes, parse
 
 class TestNode(nodes.Node):
     tag = 'test'
-    params = ('foo?', 'bar?')
+    params = {'foo?': False, 'bar?': False}
 
     def make_attributes(self) -> html.Attributes:
         return self.attributes | {'data': html.format_attributes(self.data)}

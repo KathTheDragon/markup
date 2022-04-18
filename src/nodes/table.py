@@ -6,10 +6,10 @@ from ..utils import partition, strip
 
 class TableNode(Node):
     tag = 'table'
-    params = ('headers=',)
+    params = {'headers=': ''}
 
     def make_data(self, data: Attributes) -> Attributes:
-        data['headers'] = list(filter(None, data.get('headers', '').split(',')))
+        data['headers'] = list(filter(None, data['headers'].split(',')))
         if not (set(data['headers']) <= {'rows', 'cols'}):
             raise InvalidData('headers can only contain \'rows\' and \'cols\'')
         return data

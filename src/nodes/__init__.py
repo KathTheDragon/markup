@@ -25,11 +25,11 @@ class DescribeNode(Node):
 
 class LinkNode(Node):
     tag = 'a'
-    params = ('_blank?', 'url')
+    params = {'_blank?': False, 'url': None}
 
     def make_attributes(self) -> Attributes:
         return self.attributes | {
-            'target': '_blank' if self.data.get('_blank') else None,
+            'target': '_blank' if self.data['_blank'] else None,
             'href': self.data['url']
         }
 
@@ -39,7 +39,7 @@ class LinkNode(Node):
 
 class SectionNode(Node):
     tag = 'section'
-    params = ('level', 'title')
+    params = {'level': None, 'title': None}
 
     def make_data(self, data: Attributes) -> Attributes:
         if data['level'] not in ('1', '2', '3', '4', '5', '6'):
@@ -62,9 +62,9 @@ class SectionNode(Node):
 class ListNode(Node):
     @property
     def tag(self) -> str:
-        return 'ol' if self.data else 'ul'
+        return 'ol' if any(self.data.values()) else 'ul'
 
-    params = ('start=', 'reversed?')
+    params = {'start=': '', 'reversed?': False}
 
     def make_attributes(self) -> Attributes:
         return self.attributes | self.data
