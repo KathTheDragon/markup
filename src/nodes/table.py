@@ -1,5 +1,4 @@
 from functools import reduce
-from typing import Optional
 from .base import MarkupError, InvalidData, Node
 from ..html import Attributes, html
 from ..utils import partition, strip
@@ -14,8 +13,8 @@ class TableNode(Node):
             raise InvalidData('headers can only contain \'rows\' and \'cols\'')
         return data
 
-    def make_content(self) -> Optional[list[str]]:
-        text = self.text or []
+    def make_content(self) -> list[str]:
+        text = self.text
         rows = []
 
         if '//' in text:

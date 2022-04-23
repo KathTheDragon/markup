@@ -1,4 +1,3 @@
-from typing import Optional
 from ..html import Attributes, html
 
 class MarkupError(Exception):
@@ -20,10 +19,10 @@ class Node:
     tag: str
     params: Attributes = {}
 
-    def __init__(self, id: Optional[str]=None, classes: list[str]=None, data: list[str]=None, text: Optional[list[str]]=None) -> None:
+    def __init__(self, id: str='', classes: list[str]=None, data: list[str]=None, text: list[str]=None) -> None:
         self.attributes = {'id': id, 'class': classes or []}
         self.data = self.make_data(parse_data(data or [], self.params))
-        self.text = text
+        self.text = text or []
 
     def __str__(self) -> str:
         return html(self.tag, self.make_attributes(), self.make_content())
@@ -34,7 +33,7 @@ class Node:
     def make_attributes(self) -> Attributes:
         return self.attributes
 
-    def make_content(self) -> Optional[list[str]]:
+    def make_content(self) -> list[str]:
         return self.text
 
 

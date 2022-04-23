@@ -62,7 +62,7 @@ class Markup:
         if value and value[0] == '#':
             id, value = self.parse_string(value[1:], alphabet=STRING_CHARS, error_msg='Invalid id')
         else:
-            id = None
+            id = ''
 
         classes = []
         while value and value[0] == '.':
@@ -79,7 +79,7 @@ class Markup:
             text, value = self.parse_list(value[1:], end='}')
             value = value[1:]
         else:
-            text = None
+            text = []
 
         try:
             node = self.nodes.get(prefix, {}).get(command)
