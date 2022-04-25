@@ -38,24 +38,18 @@ class LinkNode(Node):
 
 class SectionNode(Node):
     tag = 'section'
-    params = {'level': None, 'title': None}
+    params = {'level': None}
 
     def make_data(self, data: Attributes) -> Attributes:
         if data['level'] not in ('1', '2', '3', '4', '5', '6'):
             raise InvalidData('level must be a digit 1-6')
         return data
 
-    def make_attributes(self) -> Attributes:
-        id = self.attributes['id'] or f'sect-{self.data["title"].lower().replace(" ", "-")}'
-        return self.attributes | {'id': id}
-
     def make_content(self, text: list[str]) -> list[str]:
-        level, title = self.data['level'], self.data['title']
-        heading = html(f'h{level}', {}, [title])
-        if text and text[0].startswith('\n'):
-            indent = re.match(r'\n( *)', text[0]).group(1)
-            heading = f'\n{indent}{heading}\n'
-        return [heading, *text]
+        level = self.data['level']
+        title, body = [split(part) for part in partition(text, '/')]
+        title[1] = html(f'h{level}', {}, title[1])
+        return title + body
 
 
 class ListNode(Node):
