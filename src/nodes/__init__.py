@@ -8,9 +8,9 @@ from ..utils import partition, strip
 class DescribeNode(Node):
     tag = 'dl'
 
-    def make_content(self) -> list[str]:
+    def make_content(self, text: list[str]) -> list[str]:
         content = []
-        for row in partition(self.text, '/'):
+        for row in partition(text, '/'):
             cells = [strip(cell) for cell in partition(row, '|')]
             leading, term, trailing = cells.pop(0)
             if term:
@@ -32,8 +32,8 @@ class LinkNode(Node):
             'href': self.data['url']
         }
 
-    def make_content(self) -> list[str]:
-        return self.text or [self.data['url']]
+    def make_content(self, text: list[str]) -> list[str]:
+        return text or [self.data['url']]
 
 
 class SectionNode(Node):
@@ -49,13 +49,13 @@ class SectionNode(Node):
         id = self.attributes['id'] or f'sect-{self.data["title"].lower().replace(" ", "-")}'
         return self.attributes | {'id': id}
 
-    def make_content(self) -> list[str]:
+    def make_content(self, text: list[str]) -> list[str]:
         level, title = self.data['level'], self.data['title']
         heading = html(f'h{level}', {}, [title])
-        if self.text and self.text[0].startswith('\n'):
-            indent = re.match(r'\n( *)', self.text[0]).group(1)
+        if text and text[0].startswith('\n'):
+            indent = re.match(r'\n( *)', text[0]).group(1)
             heading = f'\n{indent}{heading}\n'
-        return [heading, *self.text]
+        return [heading, *text]
 
 
 class ListNode(Node):
@@ -68,9 +68,8 @@ class ListNode(Node):
     def make_attributes(self) -> Attributes:
         return self.attributes | self.data
 
-    def make_content(self) -> list[str]:
+    def make_content(self, text: list[str]) -> list[str]:
         # Don't make list items if text is empty
-        text = self.text
         if text:
             parts = partition(text, '/')
             text = []

@@ -13,8 +13,7 @@ class TableNode(Node):
             raise InvalidData('headers can only contain \'rows\' and \'cols\'')
         return data
 
-    def make_content(self) -> list[str]:
-        text = self.text
+    def make_content(self, text: list[str]) -> list[str]:
         rows = []
 
         if '//' in text:

@@ -25,7 +25,7 @@ class Node:
         self.text = text or []
 
     def __str__(self) -> str:
-        return html(self.tag, self.make_attributes(), self.make_content())
+        return html(self.tag, self.make_attributes(), self.make_content(self.text))
 
     def make_data(self, data: Attributes) -> Attributes:
         return data
@@ -33,8 +33,8 @@ class Node:
     def make_attributes(self) -> Attributes:
         return self.attributes
 
-    def make_content(self) -> list[str]:
-        return self.text
+    def make_content(self, text: list[str]) -> list[str]:
+        return text
 
 
 def parse_data(data: list[str], params: Attributes) -> Attributes:
