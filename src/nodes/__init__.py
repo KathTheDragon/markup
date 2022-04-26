@@ -47,7 +47,7 @@ class SectionNode(Node):
 
     def make_content(self, text: list[str]) -> list[str]:
         level = self.data['level']
-        title, body = [split(part) for part in partition(text, '/')]
+        title, body = [strip(part) for part in partition(text, '/')]
         title[1] = html(f'h{level}', {}, title[1])
         return title + body
 
