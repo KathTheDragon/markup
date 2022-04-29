@@ -20,6 +20,14 @@ def is_valid_char(char: str, alphabet: str, exclude: str) -> bool:
     return (not alphabet or char in alphabet) and char not in exclude
 
 
+def unescape(string: str) -> str:
+    import re
+    escapes = {
+        'n': '\n',
+    }
+    return re.sub(r'\\(.)', lambda m: escapes.get(m[1], m[1]), string, re.S)
+
+
 class Markup:
     def __init__(self) -> None:
         self.nodes = nodes.make_nodes()
@@ -31,7 +39,7 @@ class Markup:
     def parse(self, string: str, *, depth: int=0, **kwargs) -> str:
         try:
             output, _ = self.parse_string(string, **kwargs)
-            return indent(output, depth=depth)
+            return unescape(indent(output, depth=depth))
         except ParseError as e:
             return error(e.message)
 

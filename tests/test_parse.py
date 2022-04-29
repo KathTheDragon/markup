@@ -29,7 +29,8 @@ error_msg = '<span class="error">&lt;{}&gt;</span>'
 
 @staticmethods
 class Test_Markup_parse:
-    pass
+    def test_resolves_escaping():
+        assert markup.parse(r'\n\\\ \"') == '\n\\ "'
 
 
 @staticmethods
