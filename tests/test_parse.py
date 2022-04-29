@@ -53,7 +53,7 @@ class Test_Markup_parse_string:
             markup.parse_string('\\')
 
     def test_allows_embedded_nodes_if_node_prefix_accepted():
-        assert markup.parse_string('a $test b') == ('a <test /> b', '')
+        assert markup.parse_string('a $test b') == ('a <test></test> b', '')
         assert markup.parse_string('a $test b', exclude='$') == ('a ', '$test b')
 
     def test_raises_ParseError_if_nothing_parsed_and_error_message_given():
@@ -78,23 +78,23 @@ class Test_Markup_parse_node:
             markup.parse_node('$test. ')
 
     def test_multiple_ids_are_not_accepted():
-        assert markup.parse_node('$test#foo#bar') == ('<test id="foo" />', '#bar')
+        assert markup.parse_node('$test#foo#bar') == ('<test id="foo"></test>', '#bar')
 
     def test_multiple_classes_are_accepted():
-        assert markup.parse_node('$test.foo.bar') == ('<test class="foo bar" />', '')
+        assert markup.parse_node('$test.foo.bar') == ('<test class="foo bar"></test>', '')
 
     def test_data_ignores_whitespace():
-        assert markup.parse_node('$test[foo\n\n\nbar]') == ('<test data="foo bar" />', '')
+        assert markup.parse_node('$test[foo\n\n\nbar]') == ('<test data="foo bar"></test>', '')
 
     def test_data_doesnt_allow_embedded_nodes():
         with raises(parse.ParseError):
             markup.parse_node('$test[foo $test bar]')
 
-    def test_text_preserves_whitespace():
-        assert markup.parse_node('$test{foo\n\n\nbar}') == ('<test>foo\n\n\nbar</test>', '')
+    def test_text_ignores_whitespace():
+        assert markup.parse_node('$test{foo\n\n\nbar}') == ('<test>foo bar</test>', '')
 
     def test_text_allows_embedded_nodes():
-        assert markup.parse_node('$test{foo $test bar}') == ('<test>foo <test /> bar</test>', '')
+        assert markup.parse_node('$test{foo $test bar}') == ('<test>foo <test></test> bar</test>', '')
 
     def test_returns_error_span_if_unknown_node():
         assert markup.parse_node('$foo') == (error_msg.format('Invalid node: $foo'), '')
@@ -108,23 +108,20 @@ class Test_Markup_parse_list:
     def test_accepts_characters_until_end_character():
         assert markup.parse_list('abc]def', end=']') == (['abc'], ']def')
 
-    def test_groups_continguous_whitespace():
-        assert markup.parse_list(' \r\n\t\v') == ([' \r\n\t\v'], '')
+    def test_skips_whitespace():
+        assert markup.parse_list(' \r\n\t\v') == ([], '')
 
     def test_groups_quoted_characters():
         assert markup.parse_list('"a b\nc"') == (['a b\nc'], '')
 
     def test_doesnt_stop_at_end_character_inside_quotes():
-        assert markup.parse_list('"a]b"', end=']') == (['a]b'], '')
+        assert markup.parse_list('"a]b"]', end=']') == (['a]b'], ']')
 
     def test_groups_contiguous_non_whitespace():
         assert markup.parse_list('abc') == (['abc'], '')
 
-    def test_separates_whitespace_from_non_whitespace():
-        assert markup.parse_list('a b c') == (['a', ' ', 'b', ' ', 'c'], '')
-
-    def test_skips_whitespace_with_skip_whitespace_True():
-        assert markup.parse_list('a b c', skip_whitespace=True) == (['a', 'b', 'c'], '')
+    def test_separates_non_contiguous_non_whitespace():
+        assert markup.parse_list('a b c') == (['a', 'b', 'c'], '')
 
     def test_disallows_escaping_if_backslash_excluded():
         assert markup.parse_list('a\\nb') == (['a\\nb'], '')
@@ -132,7 +129,7 @@ class Test_Markup_parse_list:
             markup.parse_list('a\\nb', exclude='\\')
 
     def test_disallows_embedding_if_prefix_characters_excluded():
-        assert markup.parse_list('$test') == (['<test />'], '')
+        assert markup.parse_list('$test') == (['<test></test>'], '')
 
         with raises(parse.ParseError):
             markup.parse_list('$test', exclude='$')

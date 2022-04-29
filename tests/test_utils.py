@@ -21,27 +21,13 @@ class Test_partition:
 
         assert utils.partition([], 'a') == [[]]
 
+    def test_removes_leading_and_trailing_whitespace_from_sublists():
+        strings = [' ', '1', ' ', '2', ' ', '3', ' ']
+        assert utils.partition(strings, '2') == [['1'], ['3']]
+
 
 @staticmethods
 class Test_strip:
-    def test_separates_leading_and_trailing_whitespace_from_list():
+    def test_removes_leading_and_trailing_whitespace_from_list():
         strings = ['\r  ', 'a', 'b', 'c', '\n\r\t']
-        assert utils.strip(strings) == ('\r  ', ['a', 'b', 'c'], '\n\r\t')
-
-    def test_trims_spaces_and_tabs_from_left_edge():
-        strings = ['  \r', 'a', 'b', 'c', '\t\n\r']
-        assert utils.strip(strings) == ('\r', ['a', 'b', 'c'], '\n\r')
-
-    def test_returns_empty_strings_if_no_leading_or_trailing_whitespace():
-        strings = ['a', 'b', 'c', '\n']
-        assert utils.strip(strings) == ('', ['a', 'b', 'c'], '\n')
-
-        strings = ['\n', 'a', 'b', 'c']
-        assert utils.strip(strings) == ('\n', ['a', 'b', 'c'], '')
-
-        strings = ['a', 'b', 'c']
-        assert utils.strip(strings) == ('', ['a', 'b', 'c'], '')
-
-    def test_assumes_leading_whitespace():
-        strings = ['\n']
-        assert utils.strip(strings) == ('\n', [], '')
+        assert utils.strip(strings) == ['a', 'b', 'c']

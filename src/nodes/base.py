@@ -19,13 +19,21 @@ class Node:
     tag: str
     params: Attributes = {}
 
-    def __init__(self, id: str='', classes: list[str]=None, data: list[str]=None, text: list[str]=None) -> None:
+    def __init__(self, id: str='', classes: list[str]=None, data: Attributes=None, text: list[str]=None) -> None:
         self.attributes = {'id': id, 'class': classes or []}
-        self.data = self.make_data(parse_data(data or [], self.params))
+        self.data = self.make_data(self.default_data() | (data or {}))
         self.text = text or []
 
     def __str__(self) -> str:
         return html(self.tag, self.make_attributes(), self.make_content(self.text))
+
+    @classmethod
+    def default_data(cls) -> Attributes:
+        return {param.removesuffix('=').removesuffix('?'): value for param, value in cls.params.items()}
+
+    @classmethod
+    def parse_data(cls, raw_data: list[str], **kwargs) -> tuple[Attributes, Attributes]:
+        return parse_data(raw_data, cls.params), kwargs
 
     def make_data(self, data: Attributes) -> Attributes:
         return data

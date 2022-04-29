@@ -17,7 +17,7 @@ class Test_Node:
         assert FooNode(id='foo').attributes == {'id': 'foo', 'class': []}
 
     def test_puts_classes_in_class_attribute():
-        assert FooNode(classes=['foo', 'bar']).attributes == {'id': None, 'class': ['foo', 'bar']}
+        assert FooNode(classes=['foo', 'bar']).attributes == {'id': '', 'class': ['foo', 'bar']}
 
 
 @staticmethods

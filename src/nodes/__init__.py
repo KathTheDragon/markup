@@ -1,8 +1,9 @@
 import re
+from typing import Union
 from .base import MarkupError, InvalidData, Node
 from .table import TableNode
 from ..html import Attributes, html
-from ..utils import partition, strip
+from ..utils import partition
 
 
 class DescribeNode(Node):
@@ -11,14 +12,12 @@ class DescribeNode(Node):
     def make_content(self, text: list[str]) -> list[str]:
         content = []
         for row in partition(text, '/'):
-            cells = [strip(cell) for cell in partition(row, '|')]
-            leading, term, trailing = cells.pop(0)
+            cells = partition(row, '|')
+            term = cells.pop(0)
             if term:
-                content.extend([leading, html('dt', {}, term), trailing])
-            else:
-                content.append(leading)
-            for leading, desc, trailing in cells:
-                content.extend([leading, html('dd', {}, desc), trailing])
+                content.append(html('dt', {}, term))
+            for desc in cells:
+                content.append(html('dd', {}, desc))
         return content
 
 
@@ -46,10 +45,8 @@ class SectionNode(Node):
         return data
 
     def make_content(self, text: list[str]) -> list[str]:
-        level = self.data['level']
-        title, body = [strip(part) for part in partition(text, '/')]
-        title[1] = html(f'h{level}', {}, title[1])
-        return title + body
+        title, body = partition(text, '/')
+        return [html(f'h{self.data["level"]}', {}, title), ''] + body
 
 
 class ListNode(Node):
@@ -65,15 +62,7 @@ class ListNode(Node):
     def make_content(self, text: list[str]) -> list[str]:
         # Don't make list items if text is empty
         if text:
-            parts = partition(text, '/')
-            text = []
-            for part in parts:
-                leading, part, trailing = strip(part)
-                if leading:
-                    text.append(leading)
-                text.append(html('li', {}, part))
-                if trailing:
-                    text.append(trailing)
+            text = [html('li', {}, part) for part in partition(text, '/')]
         return text
 
 
