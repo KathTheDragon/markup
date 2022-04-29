@@ -25,7 +25,7 @@ def unescape(string: str) -> str:
     escapes = {
         'n': '\n',
     }
-    return re.sub(r'\\(.)', lambda m: escapes.get(m[1], m[1]), string, re.S)
+    return re.sub(r'\\(.)', lambda m: escapes.get(m[1], m[1]), string, flags=re.S)
 
 
 class Markup:
