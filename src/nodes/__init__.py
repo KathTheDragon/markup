@@ -37,7 +37,11 @@ class LinkNode(Node):
 
 class SectionNode(Node):
     tag = 'section'
-    params = {'level': None}
+
+    @staticmethod
+    def parse_data(data: Attributes, kwargs: Attributes) -> tuple[Attributes, Attributes]:
+        data['level'] = kwargs.get('section_level', '1')
+        return data, kwargs | {'section_level': str(int(data['level']) + 1)}
 
     def make_data(self, data: Attributes) -> Attributes:
         if data['level'] not in ('1', '2', '3', '4', '5', '6'):
