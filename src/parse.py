@@ -1,7 +1,7 @@
 import string
 from typing import Optional
 from . import nodes
-from .html import indent
+from .html import Attributes, indent
 
 class ParseError(Exception):
     def __init__(self, message: str, remainder: str) -> str:
@@ -84,10 +84,10 @@ class Markup:
 
         if value and value[0] == '[':
             raw_data, value = self.parse_list(value[1:], exclude=self.prefixes, end=']', error_msg='Incomplete data field')
-            data, kwargs = node.parse_data(raw_data, kwargs=kwargs)
             value = value[1:]
         else:
-            data = []
+            raw_data = []
+        data, kwargs = node._parse_data(raw_data, kwargs=kwargs)
 
         if value and value[0] == '{':
             text, value = self.parse_list(value[1:], end='}', error_msg='Incomplete text field', kwargs=kwargs)
