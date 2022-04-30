@@ -38,12 +38,12 @@ class Markup:
 
     def parse(self, string: str, *, depth: int=0, **kwargs) -> str:
         try:
-            output, _ = self.parse_string(string, **kwargs)
+            output, _ = self.parse_string(string, kwargs=kwargs)
             return unescape(indent(output, depth=depth))
         except ParseError as e:
             return error(e.message)
 
-    def parse_string(self, value: str, *, alphabet: str='', exclude: str='', error_msg: str='', **kwargs) -> tuple[str, str]:
+    def parse_string(self, value: str, *, alphabet: str='', exclude: str='', error_msg: str='', kwargs: Attributes=None) -> tuple[str, str]:
         out = ''
         while value and is_valid_char(value[0], alphabet, exclude):
             if value[0] == '\\':
@@ -53,7 +53,7 @@ class Markup:
                     out += value[:2]
                     value = value[2:]
             elif value[0] in self.prefixes:
-                node, value = self.parse_node(value, **kwargs)
+                node, value = self.parse_node(value, kwargs=kwargs)
                 out += node
             else:
                 out += value[0]
@@ -63,7 +63,7 @@ class Markup:
         else:
             raise ParseError(error_msg, value)
 
-    def parse_node(self, value: str, **kwargs) -> tuple[str, str]:
+    def parse_node(self, value: str, *, kwargs: Attributes=None) -> tuple[str, str]:
         # $cmd#id.class.class[data]{text}
         prefix, value = value[0], value[1:]
         command, value = self.parse_string(value, alphabet=STRING_CHARS, error_msg='Invalid command name')
@@ -84,13 +84,13 @@ class Markup:
 
         if value and value[0] == '[':
             raw_data, value = self.parse_list(value[1:], exclude=self.prefixes, end=']', error_msg='Incomplete data field')
-            data, kwargs = node.parse_data(raw_data, **kwargs)
+            data, kwargs = node.parse_data(raw_data, kwargs=kwargs)
             value = value[1:]
         else:
             data = []
 
         if value and value[0] == '{':
-            text, value = self.parse_list(value[1:], end='}', error_msg='Incomplete text field', **kwargs)
+            text, value = self.parse_list(value[1:], end='}', error_msg='Incomplete text field', kwargs=kwargs)
             value = value[1:]
         else:
             text = []
@@ -102,21 +102,21 @@ class Markup:
         except Exception as e:
             return error(f'{type(e).__name__}: {e}'), value
 
-    def parse_list(self, value: str, *, exclude: str='', end: str='', error_msg: str='', **kwargs) -> tuple[list[str], str]:
+    def parse_list(self, value: str, *, exclude: str='', end: str='', error_msg: str='', kwargs: Attributes=None) -> tuple[list[str], str]:
         parts = []
         while value and value[0] not in end:
             if value[0] in string.whitespace:
                 _, value = self.parse_string(value, alphabet=string.whitespace)
                 continue
             elif value[0] == '"':
-                part, value = self.parse_string(value[1:], exclude=exclude + '"', **kwargs)
+                part, value = self.parse_string(value[1:], exclude=exclude + '"', kwargs=kwargs)
                 if not value:
                     raise ParseError('Incomplete string', value)
                 elif value[0] != '"':
                     raise ParseError('Invalid character', value)
                 value = value[1:]
             else:
-                part, value = self.parse_string(value, exclude=exclude + end + '"' + string.whitespace, error_msg='Invalid character', **kwargs)
+                part, value = self.parse_string(value, exclude=exclude + end + '"' + string.whitespace, error_msg='Invalid character', kwargs=kwargs)
             parts.append(part)
         if end and not value:
             raise ParseError(error_msg, value)

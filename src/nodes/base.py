@@ -32,8 +32,12 @@ class Node:
         return {param.removesuffix('=').removesuffix('?'): value for param, value in cls.params.items()}
 
     @classmethod
-    def parse_data(cls, raw_data: list[str], **kwargs) -> tuple[Attributes, Attributes]:
-        return parse_data(raw_data, cls.params), kwargs
+    def _parse_data(cls, raw_data: list[str], *, kwargs: Attributes=None) -> tuple[Attributes, Attributes]:
+        return cls.parse_data(parse_data(raw_data, cls.params), kwargs or {})
+
+    @staticmethod
+    def parse_data(data: Attributes, kwargs: Attributes) -> tuple[Attributes, Attributes]:
+        return data, kwargs
 
     def make_data(self, data: Attributes) -> Attributes:
         return data
