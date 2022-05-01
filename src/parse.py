@@ -87,7 +87,10 @@ class Markup:
             value = value[1:]
         else:
             raw_data = []
-        data, kwargs = node._parse_data(raw_data, kwargs=kwargs)
+        try:
+            data, kwargs = node._parse_data(raw_data, kwargs=kwargs)
+        except nodes.MarkupError as e:
+            return error(e.message), value
 
         if value and value[0] == '{':
             text, value = self.parse_list(value[1:], end='}', error_msg='Incomplete text field', kwargs=kwargs)
