@@ -71,7 +71,7 @@ class ListNode(Node):
 
 
 SIMPLE_NODES = [
-    'br', 'blockquote', 'div', 'em', 'hr', 'p', 'sup', 'sub', 'strong',
+    'br', 'blockquote', 'div', 'em', 'hr', 'i', 'p', 'sup', 'sub', 'strong',
 ]
 def _make_simple_node(node: str) -> Node:
     return type(f'{node.capitalize()}Node', (Node,), {'tag': node})
